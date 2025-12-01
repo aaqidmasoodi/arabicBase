@@ -83,40 +83,124 @@ export const storage = {
     },
 
     async getDialects(): Promise<string[]> {
-        const { data, error } = await supabase.from('dialects').select('name');
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return [];
+
+        const { data, error } = await supabase
+            .from('user_dialects')
+            .select('dialects(name)')
+            .eq('user_id', user.id);
+
         if (error) {
             console.error('Error fetching dialects:', error);
             return [];
         }
-        return data.map((d: { name: string }) => d.name);
+        return data.map((d: any) => d.dialects.name);
     },
 
     async addDialect(name: string): Promise<void> {
-        const { error } = await supabase.from('dialects').insert({ name });
-        if (error) throw error;
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('User not authenticated');
+
+        // 1. Ensure dialect exists globally
+        let dialectId: string;
+        const { data: existing } = await supabase.from('dialects').select('id').eq('name', name).single();
+
+        if (existing) {
+            dialectId = existing.id;
+        } else {
+            const { data: newDialect, error } = await supabase.from('dialects').insert({ name }).select('id').single();
+            if (error) throw error;
+            dialectId = newDialect.id;
+        }
+
+        // 2. Link to user
+        const { error: linkError } = await supabase.from('user_dialects').insert({
+            user_id: user.id,
+            dialect_id: dialectId
+        });
+
+        if (linkError && linkError.code !== '23505') { // Ignore unique violation (already linked)
+            throw linkError;
+        }
     },
 
     async removeDialect(name: string): Promise<void> {
-        const { error } = await supabase.from('dialects').delete().eq('name', name);
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('User not authenticated');
+
+        // Get dialect ID
+        const { data: dialect } = await supabase.from('dialects').select('id').eq('name', name).single();
+        if (!dialect) return;
+
+        // Remove link ONLY
+        const { error } = await supabase
+            .from('user_dialects')
+            .delete()
+            .eq('user_id', user.id)
+            .eq('dialect_id', dialect.id);
+
         if (error) throw error;
     },
 
     async getCategories(): Promise<string[]> {
-        const { data, error } = await supabase.from('categories').select('name');
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return [];
+
+        const { data, error } = await supabase
+            .from('user_categories')
+            .select('categories(name)')
+            .eq('user_id', user.id);
+
         if (error) {
             console.error('Error fetching categories:', error);
             return [];
         }
-        return data.map((c: { name: string }) => c.name);
+        return data.map((c: any) => c.categories.name);
     },
 
     async addCategory(name: string): Promise<void> {
-        const { error } = await supabase.from('categories').insert({ name });
-        if (error) throw error;
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('User not authenticated');
+
+        // 1. Ensure category exists globally
+        let categoryId: string;
+        const { data: existing } = await supabase.from('categories').select('id').eq('name', name).single();
+
+        if (existing) {
+            categoryId = existing.id;
+        } else {
+            const { data: newCategory, error } = await supabase.from('categories').insert({ name }).select('id').single();
+            if (error) throw error;
+            categoryId = newCategory.id;
+        }
+
+        // 2. Link to user
+        const { error: linkError } = await supabase.from('user_categories').insert({
+            user_id: user.id,
+            category_id: categoryId
+        });
+
+        if (linkError && linkError.code !== '23505') { // Ignore unique violation
+            throw linkError;
+        }
     },
 
     async removeCategory(name: string): Promise<void> {
-        const { error } = await supabase.from('categories').delete().eq('name', name);
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('User not authenticated');
+
+        // Get category ID
+        const { data: category } = await supabase.from('categories').select('id').eq('name', name).single();
+        if (!category) return;
+
+        // Remove link ONLY
+        const { error } = await supabase
+            .from('user_categories')
+            .delete()
+            .eq('user_id', user.id)
+            .eq('category_id', category.id);
+
         if (error) throw error;
     },
 
@@ -132,5 +216,31 @@ export const storage = {
             return null;
         }
         return data;
+    },
+
+    async getGlobalDialects(): Promise<string[]> {
+        const { data, error } = await supabase
+            .from('dialects')
+            .select('name')
+            .order('name');
+
+        if (error) {
+            console.error('Error fetching global dialects:', error);
+            return [];
+        }
+        return data.map(d => d.name);
+    },
+
+    async getGlobalCategories(): Promise<string[]> {
+        const { data, error } = await supabase
+            .from('categories')
+            .select('name')
+            .order('name');
+
+        if (error) {
+            console.error('Error fetching global categories:', error);
+            return [];
+        }
+        return data.map(c => c.name);
     }
 };

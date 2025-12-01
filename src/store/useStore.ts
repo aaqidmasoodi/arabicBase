@@ -11,6 +11,9 @@ interface AppState {
     entries: Entry[];
     dialects: string[];
     categories: string[];
+    globalDialects: string[];
+    globalCategories: string[];
+    loadGlobalData: () => Promise<void>;
     isLoading: boolean;
     theme: 'light' | 'dark';
     toggleTheme: () => void;
@@ -36,6 +39,8 @@ export const useStore = create<AppState>((set, get) => ({
     entries: [],
     dialects: [],
     categories: [],
+    globalDialects: [],
+    globalCategories: [],
     isLoading: false,
     isPro: false,
     checkLimit: () => {
@@ -60,16 +65,30 @@ export const useStore = create<AppState>((set, get) => ({
                 storage.getCategories()
             ]);
 
-            // Only update dialects/categories if we got data back, otherwise keep defaults or handle empty
             set({
                 entries,
-                dialects: dialects.length > 0 ? dialects : get().dialects,
-                categories: categories.length > 0 ? categories : get().categories
+                dialects,
+                categories
             });
         } catch (error) {
             console.error('Failed to load data:', error);
         } finally {
             set({ isLoading: false });
+        }
+    },
+
+    loadGlobalData: async () => {
+        try {
+            console.log('Loading global data...');
+            const [globalDialects, globalCategories] = await Promise.all([
+                storage.getGlobalDialects(),
+                storage.getGlobalCategories()
+            ]);
+            console.log('Global Dialects:', globalDialects);
+            console.log('Global Categories:', globalCategories);
+            set({ globalDialects, globalCategories });
+        } catch (error) {
+            console.error('Failed to load global data:', error);
         }
     },
 

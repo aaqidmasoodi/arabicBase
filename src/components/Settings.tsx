@@ -6,30 +6,55 @@ import { Trash2, Settings as SettingsIcon, Globe, Tag, LogOut } from 'lucide-rea
 
 export const Settings: React.FC = () => {
     const navigate = useNavigate();
-    const { dialects, categories, addDialect, removeDialect, addCategory, removeCategory, user } = useStore();
+    const {
+        dialects, categories,
+        globalDialects, globalCategories, loadGlobalData,
+        addDialect, removeDialect,
+        addCategory, removeCategory,
+        user
+    } = useStore();
+
     const [newDialect, setNewDialect] = useState('');
     const [newCategory, setNewCategory] = useState('');
+    const [showDialectSuggestions, setShowDialectSuggestions] = useState(false);
+    const [showCategorySuggestions, setShowCategorySuggestions] = useState(false);
+
+    React.useEffect(() => {
+        loadGlobalData();
+    }, [loadGlobalData]);
 
     const handleLogout = async () => {
         await supabase.auth.signOut();
         navigate('/');
     };
 
-    const handleAddDialect = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (newDialect.trim() && !dialects.includes(newDialect.trim())) {
-            addDialect(newDialect.trim());
+    const handleAddDialect = (name: string) => {
+        if (name.trim() && !dialects.includes(name.trim())) {
+            addDialect(name.trim());
             setNewDialect('');
+            setShowDialectSuggestions(false);
+            // Refresh global data in case it was a new one
+            setTimeout(loadGlobalData, 1000);
         }
     };
 
-    const handleAddCategory = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (newCategory.trim() && !categories.includes(newCategory.trim())) {
-            addCategory(newCategory.trim());
+    const handleAddCategory = (name: string) => {
+        if (name.trim() && !categories.includes(name.trim())) {
+            addCategory(name.trim());
             setNewCategory('');
+            setShowCategorySuggestions(false);
+            // Refresh global data in case it was a new one
+            setTimeout(loadGlobalData, 1000);
         }
     };
+
+    const filteredDialects = globalDialects.filter(d =>
+        d.toLowerCase().includes(newDialect.toLowerCase()) && !dialects.includes(d)
+    );
+
+    const filteredCategories = globalCategories.filter(c =>
+        c.toLowerCase().includes(newCategory.toLowerCase()) && !categories.includes(c)
+    );
 
     return (
         <div className="max-w-3xl mx-auto pb-24 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -78,24 +103,44 @@ export const Settings: React.FC = () => {
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Dialects</h3>
                     </div>
 
-                    <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+                    <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-visible relative z-20">
                         <div className="p-4 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-800">
-                            <form onSubmit={handleAddDialect} className="flex gap-2">
-                                <input
-                                    type="text"
-                                    value={newDialect}
-                                    onChange={(e) => setNewDialect(e.target.value)}
-                                    placeholder="Add new dialect (e.g. Levantine)"
-                                    className="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-sm"
-                                />
-                                <button
-                                    type="submit"
-                                    disabled={!newDialect.trim()}
-                                    className="px-3 py-2 md:px-4 text-white text-xs md:text-sm font-medium rounded-lg bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                                >
-                                    Add
-                                </button>
-                            </form>
+                            <div className="relative">
+                                <div className="flex gap-2">
+                                    <input
+                                        type="text"
+                                        value={newDialect}
+                                        onChange={(e) => {
+                                            setNewDialect(e.target.value);
+                                            setShowDialectSuggestions(true);
+                                        }}
+                                        onFocus={() => setShowDialectSuggestions(true)}
+                                        placeholder="Search or add new dialect..."
+                                        className="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-sm"
+                                    />
+                                    <button
+                                        onClick={() => handleAddDialect(newDialect)}
+                                        disabled={!newDialect.trim()}
+                                        className="px-3 py-2 md:px-4 text-white text-xs md:text-sm font-medium rounded-lg bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    >
+                                        Add
+                                    </button>
+                                </div>
+                                {/* Autocomplete Dropdown */}
+                                {showDialectSuggestions && newDialect && filteredDialects.length > 0 && (
+                                    <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-48 overflow-y-auto z-50">
+                                        {filteredDialects.map(d => (
+                                            <button
+                                                key={d}
+                                                onClick={() => handleAddDialect(d)}
+                                                className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors"
+                                            >
+                                                {d}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                         </div>
                         <ul className="divide-y divide-gray-100 dark:divide-gray-800">
                             {dialects.map((dialect) => (
@@ -125,24 +170,44 @@ export const Settings: React.FC = () => {
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Categories</h3>
                     </div>
 
-                    <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+                    <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-visible relative z-10">
                         <div className="p-4 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-800">
-                            <form onSubmit={handleAddCategory} className="flex gap-2">
-                                <input
-                                    type="text"
-                                    value={newCategory}
-                                    onChange={(e) => setNewCategory(e.target.value)}
-                                    placeholder="Add new category (e.g. Food)"
-                                    className="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none transition-all text-sm"
-                                />
-                                <button
-                                    type="submit"
-                                    disabled={!newCategory.trim()}
-                                    className="px-3 py-2 md:px-4 text-white text-xs md:text-sm font-medium rounded-lg bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                                >
-                                    Add
-                                </button>
-                            </form>
+                            <div className="relative">
+                                <div className="flex gap-2">
+                                    <input
+                                        type="text"
+                                        value={newCategory}
+                                        onChange={(e) => {
+                                            setNewCategory(e.target.value);
+                                            setShowCategorySuggestions(true);
+                                        }}
+                                        onFocus={() => setShowCategorySuggestions(true)}
+                                        placeholder="Search or add new category..."
+                                        className="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none transition-all text-sm"
+                                    />
+                                    <button
+                                        onClick={() => handleAddCategory(newCategory)}
+                                        disabled={!newCategory.trim()}
+                                        className="px-3 py-2 md:px-4 text-white text-xs md:text-sm font-medium rounded-lg bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    >
+                                        Add
+                                    </button>
+                                </div>
+                                {/* Autocomplete Dropdown */}
+                                {showCategorySuggestions && newCategory && filteredCategories.length > 0 && (
+                                    <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-48 overflow-y-auto z-50">
+                                        {filteredCategories.map(c => (
+                                            <button
+                                                key={c}
+                                                onClick={() => handleAddCategory(c)}
+                                                className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-700 dark:hover:text-purple-400 transition-colors"
+                                            >
+                                                {c}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                         </div>
                         <ul className="divide-y divide-gray-100 dark:divide-gray-800">
                             {categories.map((category) => (
