@@ -79,13 +79,10 @@ export const useStore = create<AppState>((set, get) => ({
 
     loadGlobalData: async () => {
         try {
-            console.log('Loading global data...');
             const [globalDialects, globalCategories] = await Promise.all([
                 storage.getGlobalDialects(),
                 storage.getGlobalCategories()
             ]);
-            console.log('Global Dialects:', globalDialects);
-            console.log('Global Categories:', globalCategories);
             set({ globalDialects, globalCategories });
         } catch (error) {
             console.error('Failed to load global data:', error);

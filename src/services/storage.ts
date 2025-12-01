@@ -23,6 +23,43 @@ export const storage = {
     },
 
     async saveEntry(entry: Entry): Promise<void> {
+        // 1. Handle Concept Linking
+        let conceptId = null;
+        if (entry.translation) {
+            const normalizedTranslation = entry.translation.trim().toLowerCase();
+
+            // Check if concept exists
+            const { data: existingConcept } = await supabase
+                .from('concepts')
+                .select('id')
+                .eq('name', normalizedTranslation)
+                .single();
+
+            if (existingConcept) {
+                conceptId = existingConcept.id;
+            } else {
+                // Create new concept
+                const { data: newConcept, error: conceptError } = await supabase
+                    .from('concepts')
+                    .insert({ name: normalizedTranslation })
+                    .select('id')
+                    .single();
+
+                if (!conceptError && newConcept) {
+                    conceptId = newConcept.id;
+                } else if (conceptError?.code === '23505') {
+                    // Handle race condition: created by someone else in the meantime
+                    const { data: retryConcept } = await supabase
+                        .from('concepts')
+                        .select('id')
+                        .eq('name', normalizedTranslation)
+                        .single();
+                    if (retryConcept) conceptId = retryConcept.id;
+                }
+            }
+        }
+
+        // 2. Upsert Entry
         const { error } = await supabase
             .from('entries')
             .upsert({
@@ -37,7 +74,8 @@ export const storage = {
                 notes: entry.notes,
                 has_ai_insights: entry.hasAiInsights,
                 ai_enrichment: entry.aiEnrichment,
-                updated_at: new Date().toISOString()
+                updated_at: new Date().toISOString(),
+                concept_id: conceptId
             });
 
         if (error) {
