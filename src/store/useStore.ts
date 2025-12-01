@@ -66,7 +66,7 @@ export const useStore = create<AppState>((set, get) => ({
 
         // 2. Trigger background AI enrichment
         if (!entry.hasAiInsights) {
-            groqService.generateAiInsights(entry.term, entry.notes)
+            groqService.generateAiInsights(entry.term, entry.notes, entry.dialect, entry.translation, entry.transliteration, entry.category, entry.type)
                 .then(async (jsonStr) => {
                     try {
                         const insights = JSON.parse(jsonStr);
@@ -98,12 +98,70 @@ export const useStore = create<AppState>((set, get) => ({
     },
 
     updateEntry: async (updatedEntry) => {
+        // 1. Save the user's manual updates immediately
         await storage.saveEntry(updatedEntry);
+
+        // Get the old entry to compare
+        const oldEntry = get().entries.find(e => e.id === updatedEntry.id);
+
         set((state) => ({
             entries: state.entries.map((entry) =>
                 entry.id === updatedEntry.id ? updatedEntry : entry
             ),
         }));
+
+        // 2. Check if we need to regenerate AI insights
+        // Regenerate if:
+        // - No insights exist yet
+        // - OR Core fields changed (Term, Translation, Dialect, Category, Type)
+        const shouldRegenerate = !updatedEntry.hasAiInsights || (oldEntry && (
+            oldEntry.term !== updatedEntry.term ||
+            oldEntry.translation !== updatedEntry.translation ||
+            oldEntry.dialect !== updatedEntry.dialect ||
+            oldEntry.category !== updatedEntry.category ||
+            oldEntry.type !== updatedEntry.type ||
+            oldEntry.transliteration !== updatedEntry.transliteration
+        ));
+
+        if (shouldRegenerate) {
+            console.log('Regenerating AI insights for updated entry:', updatedEntry.term);
+            groqService.generateAiInsights(
+                updatedEntry.term,
+                updatedEntry.notes,
+                updatedEntry.dialect,
+                updatedEntry.translation,
+                updatedEntry.transliteration,
+                updatedEntry.category,
+                updatedEntry.type
+            )
+                .then(async (jsonStr) => {
+                    try {
+                        const insights = JSON.parse(jsonStr);
+                        const enrichedEntry: Entry = {
+                            ...updatedEntry,
+                            aiEnrichment: {
+                                synonyms: insights.synonyms || [],
+                                exampleUsage: insights.exampleUsage || '',
+                                culturalContext: insights.culturalContext || '',
+                                grammaticalNotes: insights.grammaticalNotes || '',
+                            },
+                            hasAiInsights: true,
+                            updatedAt: Date.now(),
+                        };
+
+                        // Save and update store again with the AI data
+                        await storage.saveEntry(enrichedEntry);
+                        set((state) => ({
+                            entries: state.entries.map((e) =>
+                                e.id === enrichedEntry.id ? enrichedEntry : e
+                            ),
+                        }));
+                    } catch (e) {
+                        console.error('Failed to parse AI insights on update:', e);
+                    }
+                })
+                .catch((err) => console.error('Background enrichment failed on update:', err));
+        }
     },
 
     deleteEntry: async (id) => {

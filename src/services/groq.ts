@@ -33,7 +33,7 @@ export const groqService = {
                 },
                 body: JSON.stringify({
                     messages: [{ role: 'user', content: prompt }],
-                    model: 'llama-3.1-8b-instant',
+                    model: 'meta-llama/llama-4-maverick-17b-128e-instruct',
                     temperature: 0.3,
                     max_completion_tokens: 128,
                     response_format: { type: "json_object" }
@@ -51,21 +51,41 @@ export const groqService = {
         }
     },
 
-    async generateAiInsights(term: string, context: string = ''): Promise<string> {
+    async generateAiInsights(term: string, context: string = '', dialect: string = 'General', translation: string = '', transliteration: string = '', category: string = 'General', type: string = 'word'): Promise<string> {
         if (!GROQ_API_KEY) {
             console.warn('GROQ_API_KEY is missing');
             return '{}';
         }
 
+        const systemPrompt = `You are an expert linguist specializing in ARABIC DIALECTS. 
+        Your goal is to explain terms based on their DAILY USAGE in the specific Arabic dialect requested.
+        NEVER confuse Arabic terms with phonetically similar words from other languages (e.g., Hebrew, Aramaic, Persian) unless the user explicitly asks for a comparative etymology.
+        The user's provided translation is the GROUND TRUTH. Do not contradict it.`;
+
         const prompt = `
-      Analyze the Arabic term "${term}".
-      Context: ${context}
+      You are an assistant helping a user learn the "${dialect}" dialect of Arabic.
       
-      Provide a JSON response with the following fields. ALL content must be in ENGLISH, except for specific Arabic examples.
-      - synonyms: array of strings (English or transliterated Arabic)
-      - exampleUsage: string (Arabic sentence with English translation)
-      - culturalContext: string (Detailed explanation in English about cultural significance, usage, or nuance)
-      - grammaticalNotes: string (Detailed explanation in English about grammar, root, or conjugation)
+      The user has entered the following word:
+      - Arabic: "${term}"
+      - Transliteration: "${transliteration}"
+      - Definition: "${translation}"
+      - Category: "${category}"
+      - Type: "${type}"
+      
+      TASK:
+      Provide a cultural insight and an example sentence for this word, specifically matching the USER'S DEFINITION ("${translation}").
+      
+      CRITICAL RULES:
+      1. TRUST THE DEFINITION. If the Arabic word "${term}" has multiple meanings (e.g., standard vs. slang), you MUST choose the meaning that matches "${translation}".
+      2. IGNORE all other meanings. For example, if the word looks like "Qaddish" (Holy) but the user says it means "How much", you MUST treat it as "How much" (Addeish).
+      3. The example sentence MUST be in the "${dialect}" dialect and use the word to mean "${translation}".
+      4. Do NOT explain that the word has other meanings. Do NOT mention religion, saints, or other languages unless the Definition is explicitly religious.
+      
+      Provide a JSON response with:
+      - synonyms: array of strings
+      - exampleUsage: string (A sentence in ${dialect} where "${term}" means "${translation}", followed by its English translation)
+      - culturalContext: string (When do people use this word to mean "${translation}"? e.g., bargaining, asking age, etc.)
+      - grammaticalNotes: string (Brief dialect grammar notes)
       
       Output ONLY valid JSON.
     `;
@@ -78,9 +98,12 @@ export const groqService = {
                     'Authorization': `Bearer ${GROQ_API_KEY}`,
                 },
                 body: JSON.stringify({
-                    messages: [{ role: 'user', content: prompt }],
-                    model: 'llama-3.1-8b-instant',
-                    temperature: 0.5,
+                    messages: [
+                        { role: 'system', content: systemPrompt },
+                        { role: 'user', content: prompt }
+                    ],
+                    model: 'meta-llama/llama-4-maverick-17b-128e-instruct',
+                    temperature: 0.3, // Lower temperature for more deterministic results
                     max_completion_tokens: 1024,
                     response_format: { type: "json_object" }
                 }),
