@@ -118,5 +118,19 @@ export const storage = {
     async removeCategory(name: string): Promise<void> {
         const { error } = await supabase.from('categories').delete().eq('name', name);
         if (error) throw error;
+    },
+
+    async getProfile(userId: string): Promise<{ is_pro: boolean } | null> {
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('is_pro')
+            .eq('id', userId)
+            .single();
+
+        if (error) {
+            console.error('Error fetching profile:', error);
+            return null;
+        }
+        return data;
     }
 };

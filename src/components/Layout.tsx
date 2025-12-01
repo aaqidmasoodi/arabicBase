@@ -1,15 +1,19 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutGrid, Globe, Settings, Moon, Sun } from 'lucide-react';
+import { LayoutGrid, Globe, Settings, Moon, Sun, Sparkles, Crown } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import clsx from 'clsx';
 
 interface LayoutProps {
     children: React.ReactNode;
+    onUpgrade: () => void;
 }
 
-export const Layout: React.FC<LayoutProps> = ({ children }) => {
-    const { theme, toggleTheme } = useStore();
+export const Layout: React.FC<LayoutProps> = ({ children, onUpgrade }) => {
+    const { theme, toggleTheme, isPro, entries } = useStore();
+    const entryCount = entries.length;
+    const limit = 100;
+    const percentage = Math.min((entryCount / limit) * 100, 100);
 
     return (
         <div className={clsx("min-h-screen transition-colors duration-300", theme === 'dark' ? 'dark bg-gray-900' : 'bg-gray-50')}>
@@ -29,6 +33,14 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                     >
                         {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
                     </button>
+                    {!isPro && (
+                        <button
+                            onClick={onUpgrade}
+                            className="ml-2 p-2 text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 rounded-full"
+                        >
+                            <Sparkles size={20} />
+                        </button>
+                    )}
                 </header>
 
                 {/* Desktop Sidebar */}
@@ -81,7 +93,39 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                         </NavLink>
                     </nav>
 
-                    <div className="p-3 border-t border-gray-100 dark:border-gray-700/50">
+                    <div className="p-4 border-t border-gray-100 dark:border-gray-700/50 space-y-4">
+                        {!isPro ? (
+                            <div className="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-100 dark:border-gray-700">
+                                <div className="flex justify-between items-center mb-2">
+                                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Free Plan</span>
+                                    <span className="text-xs font-bold text-gray-900 dark:text-white">{entryCount} / {limit}</span>
+                                </div>
+                                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 mb-3">
+                                    <div
+                                        className="bg-emerald-500 h-1.5 rounded-full transition-all duration-500"
+                                        style={{ width: `${percentage}%` }}
+                                    ></div>
+                                </div>
+                                <button
+                                    onClick={onUpgrade}
+                                    className="w-full py-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-sm font-medium rounded-lg shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2"
+                                >
+                                    <Sparkles size={14} />
+                                    Upgrade to Pro
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-xl p-4 border border-emerald-100 dark:border-emerald-800/50 flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-800 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                                    <Crown size={16} />
+                                </div>
+                                <div>
+                                    <div className="text-sm font-bold text-gray-900 dark:text-white">Pro Member</div>
+                                    <div className="text-xs text-emerald-600 dark:text-emerald-400">Unlimited Access</div>
+                                </div>
+                            </div>
+                        )}
+
                         <button
                             onClick={toggleTheme}
                             className="w-full flex items-center justify-center lg:justify-start px-3 lg:px-4 py-3 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-gray-200 transition-all"

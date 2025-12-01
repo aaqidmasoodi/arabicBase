@@ -23,6 +23,9 @@ interface AppState {
     updateEntry: (entry: Entry) => Promise<void>;
     enrichEntry: (entry: Entry) => Promise<void>;
     deleteEntry: (id: string) => Promise<void>;
+    isPro: boolean;
+    checkLimit: () => boolean;
+    loadProfile: (userId: string) => Promise<void>;
 }
 
 export const useStore = create<AppState>((set, get) => ({
@@ -34,6 +37,12 @@ export const useStore = create<AppState>((set, get) => ({
     dialects: [],
     categories: [],
     isLoading: false,
+    isPro: false,
+    checkLimit: () => {
+        const { isPro, entries } = get();
+        if (isPro) return true;
+        return entries.length < 100;
+    },
     theme: (localStorage.getItem('theme') as 'light' | 'dark') || 'light',
 
     toggleTheme: () => {
@@ -64,7 +73,17 @@ export const useStore = create<AppState>((set, get) => ({
         }
     },
 
+    loadProfile: async (userId: string) => {
+        const profile = await storage.getProfile(userId);
+        if (profile) {
+            set({ isPro: profile.is_pro });
+        }
+    },
+
     addEntry: async (entry) => {
+        if (!get().checkLimit()) {
+            throw new Error('LIMIT_REACHED');
+        }
         // 1. Save initial entry immediately
         await storage.saveEntry(entry);
         set((state) => ({
