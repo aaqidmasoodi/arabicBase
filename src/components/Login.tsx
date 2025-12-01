@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '../services/supabase';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
-import { LogIn, Mail, Lock, Loader2, ArrowRight, Sparkles } from 'lucide-react';
+import { Mail, Lock, Loader2, ArrowRight, Sparkles } from 'lucide-react';
 import clsx from 'clsx';
 
 export const Login: React.FC = () => {
