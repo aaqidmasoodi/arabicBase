@@ -8,12 +8,10 @@ interface ExploreProps {
     onEdit: (entry: Entry) => void;
 }
 
-const DIALECTS = ['All', 'Levantine', 'Egyptian', 'Gulf', 'Maghrebi', 'Iraqi', 'Yemeni', 'Sudanese', 'MSA'];
-const CATEGORIES = ['All', 'Greeting', 'Food', 'Travel', 'Family', 'Work', 'Emotions', 'Nature', 'Time', 'Other'];
 const TYPES = ['All', 'word', 'phrase', 'idiom', 'slang', 'grammar', 'cultural', 'other'];
 
 export const Explore: React.FC<ExploreProps> = () => {
-    const { entries } = useStore();
+    const { entries, dialects, categories } = useStore();
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedDialect, setSelectedDialect] = useState('All');
     const [selectedCategory, setSelectedCategory] = useState('All');
@@ -67,7 +65,8 @@ export const Explore: React.FC<ExploreProps> = () => {
                         onChange={(e) => setSelectedDialect(e.target.value)}
                         className="px-3 py-1.5 md:px-4 md:py-2 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs md:text-sm font-medium focus:ring-2 focus:ring-emerald-500/50 outline-none min-w-[100px] md:min-w-[120px]"
                     >
-                        {DIALECTS.map(d => <option key={d} value={d}>{d === 'All' ? 'All Dialects' : d}</option>)}
+                        <option value="All">All Dialects</option>
+                        {dialects.map(d => <option key={d} value={d}>{d}</option>)}
                     </select>
 
                     <select
@@ -75,7 +74,8 @@ export const Explore: React.FC<ExploreProps> = () => {
                         onChange={(e) => setSelectedCategory(e.target.value)}
                         className="px-3 py-1.5 md:px-4 md:py-2 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs md:text-sm font-medium focus:ring-2 focus:ring-emerald-500/50 outline-none min-w-[100px] md:min-w-[120px]"
                     >
-                        {CATEGORIES.map(c => <option key={c} value={c}>{c === 'All' ? 'All Categories' : c}</option>)}
+                        <option value="All">All Categories</option>
+                        {categories.map(c => <option key={c} value={c}>{c}</option>)}
                     </select>
 
                     <select
