@@ -44,7 +44,17 @@ export const EntryList: React.FC<EntryListProps> = ({ onEdit }) => {
 
     const toggleEntry = (id: string, e: React.MouseEvent) => {
         e.stopPropagation();
-        setExpandedEntryId(prev => prev === id ? null : id);
+        const newExpandedId = expandedEntryId === id ? null : id;
+        setExpandedEntryId(newExpandedId);
+
+        // If expanding, check if we need to fetch AI insights
+        if (newExpandedId) {
+            const entry = entries.find(ent => ent.id === newExpandedId);
+            if (entry && !entry.hasAiInsights) {
+                // Trigger on-demand enrichment
+                useStore.getState().enrichEntry(entry);
+            }
+        }
     };
 
     const handleDelete = async (id: string, e: React.MouseEvent) => {

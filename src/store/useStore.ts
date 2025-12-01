@@ -21,6 +21,7 @@ interface AppState {
     loadEntries: () => Promise<void>;
     addEntry: (entry: Entry) => Promise<void>;
     updateEntry: (entry: Entry) => Promise<void>;
+    enrichEntry: (entry: Entry) => Promise<void>;
     deleteEntry: (id: string) => Promise<void>;
 }
 
@@ -169,6 +170,50 @@ export const useStore = create<AppState>((set, get) => ({
                 })
                 .catch((err) => console.error('Background enrichment failed on update:', err));
         }
+    },
+
+    enrichEntry: async (entry) => {
+        // Only enrich if not already enriched
+        if (entry.hasAiInsights) return;
+
+        console.log('Triggering on-demand AI enrichment for:', entry.term);
+
+        groqService.generateAiInsights(
+            entry.term,
+            entry.notes,
+            entry.dialect,
+            entry.translation,
+            entry.transliteration,
+            entry.category,
+            entry.type
+        )
+            .then(async (jsonStr) => {
+                try {
+                    const insights = JSON.parse(jsonStr);
+                    const enrichedEntry: Entry = {
+                        ...entry,
+                        aiEnrichment: {
+                            synonyms: insights.synonyms || [],
+                            exampleUsage: insights.exampleUsage || '',
+                            culturalContext: insights.culturalContext || '',
+                            grammaticalNotes: insights.grammaticalNotes || '',
+                        },
+                        hasAiInsights: true,
+                        updatedAt: Date.now(),
+                    };
+
+                    // Save and update store again with the AI data
+                    await storage.saveEntry(enrichedEntry);
+                    set((state) => ({
+                        entries: state.entries.map((e) =>
+                            e.id === enrichedEntry.id ? enrichedEntry : e
+                        ),
+                    }));
+                } catch (e) {
+                    console.error('Failed to parse AI insights on demand:', e);
+                }
+            })
+            .catch((err) => console.error('On-demand enrichment failed:', err));
     },
 
     deleteEntry: async (id) => {
