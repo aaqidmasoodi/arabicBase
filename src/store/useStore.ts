@@ -4,6 +4,8 @@ import { storage } from '../services/storage';
 import { groqService } from '../services/groq';
 
 interface AppState {
+    user: any | null;
+    setUser: (user: any | null) => void;
     entries: Entry[];
     dialects: string[];
     categories: string[];
@@ -21,6 +23,8 @@ interface AppState {
 }
 
 export const useStore = create<AppState>((set, get) => ({
+    user: null,
+    setUser: (user) => set({ user }),
     entries: [],
     dialects: [],
     categories: [],

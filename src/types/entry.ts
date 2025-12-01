@@ -16,6 +16,7 @@ export interface Entry {
         grammaticalNotes?: string;
     };
     hasAiInsights?: boolean;
+    userId?: string;
     createdAt: number;
     updatedAt: number;
 }
