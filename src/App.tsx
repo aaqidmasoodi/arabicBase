@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { EntryList } from './components/EntryList';
 import { EntryForm } from './components/EntryForm';
@@ -11,6 +11,7 @@ import { supabase } from './services/supabase';
 import { Plus } from 'lucide-react';
 import type { Entry } from './types/entry';
 import { UpgradeModal } from './components/UpgradeModal';
+import { LandingPage } from './components/LandingPage';
 
 function App() {
   const { loadEntries, isLoading, user, setUser, theme, loadProfile } = useStore();
@@ -81,7 +82,7 @@ function App() {
           path="*"
           element={
             !user ? (
-              <Navigate to="/login" replace />
+              <LandingPage />
             ) : (
               <Layout onUpgrade={() => setIsUpgradeOpen(true)}>
                 <div className="space-y-6">

@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { supabase } from '../services/supabase';
 import { Trash2, Settings as SettingsIcon, Globe, Tag, LogOut } from 'lucide-react';
 
 export const Settings: React.FC = () => {
+    const navigate = useNavigate();
     const { dialects, categories, addDialect, removeDialect, addCategory, removeCategory, user } = useStore();
     const [newDialect, setNewDialect] = useState('');
     const [newCategory, setNewCategory] = useState('');
 
     const handleLogout = async () => {
         await supabase.auth.signOut();
+        navigate('/');
     };
 
     const handleAddDialect = (e: React.FormEvent) => {
