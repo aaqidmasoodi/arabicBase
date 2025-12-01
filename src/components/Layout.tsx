@@ -27,20 +27,27 @@ export const Layout: React.FC<LayoutProps> = ({ children, onUpgrade }) => {
                         </div>
                         <span className="ml-2 font-bold text-lg text-gray-800 dark:text-white tracking-tight">Arabic<span className="text-emerald-500">Base</span></span>
                     </div>
-                    <button
-                        onClick={toggleTheme}
-                        className="p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
-                    >
-                        {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
-                    </button>
-                    {!isPro && (
+                    <div className="flex items-center gap-2">
+                        {!isPro && (
+                            <>
+                                <span className="text-xs font-bold text-gray-600 dark:text-gray-300 mr-1">
+                                    {entryCount}/{limit}
+                                </span>
+                                <button
+                                    onClick={onUpgrade}
+                                    className="p-2 text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 rounded-full"
+                                >
+                                    <Sparkles size={20} />
+                                </button>
+                            </>
+                        )}
                         <button
-                            onClick={onUpgrade}
-                            className="ml-2 p-2 text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 rounded-full"
+                            onClick={toggleTheme}
+                            className="p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
                         >
-                            <Sparkles size={20} />
+                            {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
                         </button>
-                    )}
+                    </div>
                 </header>
 
                 {/* Desktop Sidebar */}
@@ -95,32 +102,46 @@ export const Layout: React.FC<LayoutProps> = ({ children, onUpgrade }) => {
 
                     <div className="p-4 border-t border-gray-100 dark:border-gray-700/50 space-y-4">
                         {!isPro ? (
-                            <div className="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-100 dark:border-gray-700">
-                                <div className="flex justify-between items-center mb-2">
-                                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Free Plan</span>
-                                    <span className="text-xs font-bold text-gray-900 dark:text-white">{entryCount} / {limit}</span>
+                            <>
+                                {/* Desktop View (Full) */}
+                                <div className="hidden lg:block bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-100 dark:border-gray-700">
+                                    <div className="flex justify-between items-center mb-2">
+                                        <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Free Plan</span>
+                                        <span className="text-xs font-bold text-gray-900 dark:text-white">{entryCount} / {limit}</span>
+                                    </div>
+                                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 mb-3">
+                                        <div
+                                            className="bg-emerald-500 h-1.5 rounded-full transition-all duration-500"
+                                            style={{ width: `${percentage}%` }}
+                                        ></div>
+                                    </div>
+                                    <button
+                                        onClick={onUpgrade}
+                                        className="w-full py-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-sm font-medium rounded-lg shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2"
+                                    >
+                                        <Sparkles size={14} />
+                                        Upgrade to Pro
+                                    </button>
                                 </div>
-                                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 mb-3">
-                                    <div
-                                        className="bg-emerald-500 h-1.5 rounded-full transition-all duration-500"
-                                        style={{ width: `${percentage}%` }}
-                                    ></div>
+
+                                {/* Tablet View (Compact) */}
+                                <div className="lg:hidden flex flex-col items-center gap-2">
+                                    <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400">{entryCount}/{limit}</span>
+                                    <button
+                                        onClick={onUpgrade}
+                                        className="w-10 h-10 flex items-center justify-center bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl shadow-sm hover:shadow-md transition-all"
+                                    >
+                                        <Sparkles size={20} />
+                                    </button>
                                 </div>
-                                <button
-                                    onClick={onUpgrade}
-                                    className="w-full py-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-sm font-medium rounded-lg shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2"
-                                >
-                                    <Sparkles size={14} />
-                                    Upgrade to Pro
-                                </button>
-                            </div>
+                            </>
                         ) : (
-                            <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-xl p-4 border border-emerald-100 dark:border-emerald-800/50 flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-800 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                            <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-xl p-2 lg:p-4 border border-emerald-100 dark:border-emerald-800/50 flex flex-col lg:flex-row items-center gap-3">
+                                <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-800 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
                                     <Crown size={16} />
                                 </div>
-                                <div>
-                                    <div className="text-sm font-bold text-gray-900 dark:text-white">Pro Member</div>
+                                <div className="hidden lg:block">
+                                    <div className="text-sm font-bold text-gray-900 dark:text-white">Pro</div>
                                     <div className="text-xs text-emerald-600 dark:text-emerald-400">Unlimited Access</div>
                                 </div>
                             </div>
