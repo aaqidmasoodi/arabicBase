@@ -10,10 +10,29 @@ interface EntryListProps {
 }
 
 export const EntryList: React.FC<EntryListProps> = ({ onEdit }) => {
-    const { entries, deleteEntry } = useStore();
+    const { entries, deleteEntry, newlyAddedEntryId, clearNewlyAddedEntryId } = useStore();
     const [expandedDialects, setExpandedDialects] = useState<Record<string, boolean>>({});
     const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
     const [expandedEntryId, setExpandedEntryId] = useState<string | null>(null);
+
+    // Auto-expand newly added entry
+    React.useEffect(() => {
+        if (newlyAddedEntryId) {
+            const entry = entries.find(e => e.id === newlyAddedEntryId);
+            if (entry) {
+                // Expand the dialect
+                setExpandedDialects(prev => ({ ...prev, [entry.dialect]: true }));
+                // Expand the category
+                setExpandedCategories(prev => ({ ...prev, [`${entry.dialect}-${entry.category}`]: true }));
+                // Expand the entry itself
+                setExpandedEntryId(entry.id);
+
+                // Clear the ID so it doesn't keep re-expanding if we close it
+                // We use a small timeout to ensure the UI has updated first
+                setTimeout(() => clearNewlyAddedEntryId(), 500);
+            }
+        }
+    }, [newlyAddedEntryId, entries, clearNewlyAddedEntryId]);
 
     const toggleDialect = (dialect: string) => {
         setExpandedDialects(prev => ({ ...prev, [dialect]: !prev[dialect] }));
@@ -143,7 +162,7 @@ export const EntryList: React.FC<EntryListProps> = ({ onEdit }) => {
                                                                         </div>
                                                                     )}
 
-                                                                    {entry.hasAiInsights && entry.aiEnrichment && (
+                                                                    {entry.hasAiInsights && entry.aiEnrichment ? (
                                                                         <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                                             {entry.aiEnrichment.exampleUsage && (
                                                                                 <div className="bg-blue-50/50 dark:bg-blue-900/10 p-3 rounded-lg border border-blue-100 dark:border-blue-800/30">
@@ -157,6 +176,20 @@ export const EntryList: React.FC<EntryListProps> = ({ onEdit }) => {
                                                                                     <p className="text-sm text-gray-700 dark:text-gray-300">{entry.aiEnrichment.culturalContext}</p>
                                                                                 </div>
                                                                             )}
+                                                                        </div>
+                                                                    ) : (
+                                                                        // Shimmer Loading State for AI Insights
+                                                                        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 animate-pulse">
+                                                                            <div className="bg-gray-100 dark:bg-gray-800/50 p-3 rounded-lg h-24 border border-gray-200 dark:border-gray-700/50">
+                                                                                <div className="h-3 w-16 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
+                                                                                <div className="h-2 w-full bg-gray-200 dark:bg-gray-700 rounded mb-1"></div>
+                                                                                <div className="h-2 w-3/4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                                                                            </div>
+                                                                            <div className="bg-gray-100 dark:bg-gray-800/50 p-3 rounded-lg h-24 border border-gray-200 dark:border-gray-700/50">
+                                                                                <div className="h-3 w-16 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
+                                                                                <div className="h-2 w-full bg-gray-200 dark:bg-gray-700 rounded mb-1"></div>
+                                                                                <div className="h-2 w-3/4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                                                                            </div>
                                                                         </div>
                                                                     )}
                                                                 </div>

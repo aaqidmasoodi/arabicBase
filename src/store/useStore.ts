@@ -4,6 +4,8 @@ import { storage } from '../services/storage';
 import { groqService } from '../services/groq';
 
 interface AppState {
+    newlyAddedEntryId: string | null;
+    clearNewlyAddedEntryId: () => void;
     user: any | null;
     setUser: (user: any | null) => void;
     entries: Entry[];
@@ -23,6 +25,8 @@ interface AppState {
 }
 
 export const useStore = create<AppState>((set, get) => ({
+    newlyAddedEntryId: null,
+    clearNewlyAddedEntryId: () => set({ newlyAddedEntryId: null }),
     user: null,
     setUser: (user) => set({ user }),
     entries: [],
@@ -62,7 +66,10 @@ export const useStore = create<AppState>((set, get) => ({
     addEntry: async (entry) => {
         // 1. Save initial entry immediately
         await storage.saveEntry(entry);
-        set((state) => ({ entries: [...state.entries, entry] }));
+        set((state) => ({
+            entries: [...state.entries, entry],
+            newlyAddedEntryId: entry.id // Track the new entry ID
+        }));
 
         // 2. Trigger background AI enrichment
         if (!entry.hasAiInsights) {

@@ -71,6 +71,7 @@ export const groqService = {
       - Definition: "${translation}"
       - Category: "${category}"
       - Type: "${type}"
+      - Notes/Context: "${context}"
       
       TASK:
       Provide a cultural insight and an example sentence for this word, specifically matching the USER'S DEFINITION ("${translation}").
