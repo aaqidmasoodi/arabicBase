@@ -1,0 +1,30 @@
+Using Lamma3
+curl "https://api.groq.com/openai/v1/chat/completions" \
+  -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer ${GROQ_API_KEY}" \
+  -d '{
+         "messages": [
+           {
+             "role": "user",
+             "content": ""
+           }
+         ],
+         "model": "llama-3.1-8b-instant",
+         "temperature": 1,
+         "max_completion_tokens": 1024,
+         "top_p": 1,
+         "stream": true,
+         "stop": null
+       }'
+  
+
+using whisper
+  curl "https://api.groq.com/openai/v1/audio/transcriptions" \
+  -H "Authorization: Bearer ${GROQ_API_KEY}" \
+  -F "model=whisper-large-v3" \
+  -F "file=@./audio.m4a" \
+  -F "temperature=0" \
+  -F "response_format=verbose_json" \
+  -X POST 
+  
