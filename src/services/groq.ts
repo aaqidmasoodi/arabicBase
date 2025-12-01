@@ -131,6 +131,7 @@ export const groqService = {
         formData.append('file', audioBlob, 'audio.m4a'); // Groq expects a filename
         formData.append('temperature', '0');
         formData.append('response_format', 'verbose_json');
+        formData.append('language', 'ar'); // Force Arabic transcription
 
         try {
             const response = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
