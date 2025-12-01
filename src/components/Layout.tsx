@@ -1,8 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutGrid, Globe, Settings, Moon, Sun, LogOut } from 'lucide-react';
+import { LayoutGrid, Globe, Settings, Moon, Sun } from 'lucide-react';
 import { useStore } from '../store/useStore';
-import { supabase } from '../services/supabase';
 import clsx from 'clsx';
 
 interface LayoutProps {
@@ -10,17 +9,30 @@ interface LayoutProps {
 }
 
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
-    const { theme, toggleTheme, user } = useStore();
-
-    const handleLogout = async () => {
-        await supabase.auth.signOut();
-    };
+    const { theme, toggleTheme } = useStore();
 
     return (
         <div className={clsx("min-h-screen transition-colors duration-300", theme === 'dark' ? 'dark bg-gray-900' : 'bg-gray-50')}>
-            <div className="flex h-screen overflow-hidden">
-                {/* Sidebar */}
-                <aside className="w-20 lg:w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col transition-all duration-300 z-20">
+            <div className="flex h-screen overflow-hidden flex-col md:flex-row">
+
+                {/* Mobile Top Bar */}
+                <header className="md:hidden h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4 z-20 shrink-0">
+                    <div className="flex items-center">
+                        <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-teal-600 rounded-lg flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                            <span className="text-white font-bold text-lg">ع</span>
+                        </div>
+                        <span className="ml-2 font-bold text-lg text-gray-800 dark:text-white tracking-tight">Arabic<span className="text-emerald-500">Base</span></span>
+                    </div>
+                    <button
+                        onClick={toggleTheme}
+                        className="p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
+                    >
+                        {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+                    </button>
+                </header>
+
+                {/* Desktop Sidebar */}
+                <aside className="hidden md:flex w-20 lg:w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex-col transition-all duration-300 z-20">
                     <div className="h-20 flex items-center justify-center lg:justify-start lg:px-6 border-b border-gray-100 dark:border-gray-700/50">
                         <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-teal-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
                             <span className="text-white font-bold text-xl">ع</span>
@@ -69,7 +81,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                         </NavLink>
                     </nav>
 
-                    <div className="p-3 border-t border-gray-100 dark:border-gray-700/50 space-y-2">
+                    <div className="p-3 border-t border-gray-100 dark:border-gray-700/50">
                         <button
                             onClick={toggleTheme}
                             className="w-full flex items-center justify-center lg:justify-start px-3 lg:px-4 py-3 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-gray-200 transition-all"
@@ -77,35 +89,59 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                             {theme === 'light' ? <Moon size={22} /> : <Sun size={22} />}
                             <span className="hidden lg:block ml-3 font-medium">{theme === 'light' ? 'Dark Mode' : 'Light Mode'}</span>
                         </button>
-
-                        {user && (
-                            <div className="pt-2 border-t border-gray-100 dark:border-gray-700/50">
-                                <div className="hidden lg:flex items-center px-4 py-2 mb-2">
-                                    <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 font-bold text-xs">
-                                        {user.email?.[0].toUpperCase()}
-                                    </div>
-                                    <div className="ml-3 overflow-hidden">
-                                        <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{user.email}</p>
-                                    </div>
-                                </div>
-                                <button
-                                    onClick={handleLogout}
-                                    className="w-full flex items-center justify-center lg:justify-start px-3 lg:px-4 py-3 rounded-xl text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
-                                >
-                                    <LogOut size={22} />
-                                    <span className="hidden lg:block ml-3 font-medium">Sign Out</span>
-                                </button>
-                            </div>
-                        )}
                     </div>
                 </aside>
 
                 {/* Main Content */}
-                <main className="flex-1 overflow-y-auto bg-gray-50/50 dark:bg-gray-900/50">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <main className="flex-1 overflow-y-auto bg-gray-50/50 dark:bg-gray-900/50 relative">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24 md:pb-8">
                         {children}
                     </div>
                 </main>
+
+                {/* Mobile Bottom Navigation */}
+                <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 pb-safe z-30">
+                    <div className="flex justify-around items-center h-16">
+                        <NavLink
+                            to="/"
+                            className={({ isActive }) => clsx(
+                                "flex flex-col items-center justify-center w-full h-full transition-colors",
+                                isActive
+                                    ? "text-emerald-600 dark:text-emerald-400"
+                                    : "text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
+                            )}
+                        >
+                            <LayoutGrid size={24} />
+                            <span className="text-[10px] font-medium mt-1">Entries</span>
+                        </NavLink>
+
+                        <NavLink
+                            to="/explore"
+                            className={({ isActive }) => clsx(
+                                "flex flex-col items-center justify-center w-full h-full transition-colors",
+                                isActive
+                                    ? "text-blue-600 dark:text-blue-400"
+                                    : "text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
+                            )}
+                        >
+                            <Globe size={24} />
+                            <span className="text-[10px] font-medium mt-1">Explore</span>
+                        </NavLink>
+
+                        <NavLink
+                            to="/settings"
+                            className={({ isActive }) => clsx(
+                                "flex flex-col items-center justify-center w-full h-full transition-colors",
+                                isActive
+                                    ? "text-purple-600 dark:text-purple-400"
+                                    : "text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
+                            )}
+                        >
+                            <Settings size={24} />
+                            <span className="text-[10px] font-medium mt-1">Config</span>
+                        </NavLink>
+                    </div>
+                </nav>
             </div>
         </div>
     );

@@ -81,13 +81,13 @@ export const EntryList: React.FC<EntryListProps> = ({ onEdit }) => {
                 <div key={dialect} className="bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 rounded-2xl overflow-hidden shadow-sm transition-all hover:shadow-md">
                     <button
                         onClick={() => toggleDialect(dialect)}
-                        className="w-full flex items-center px-6 py-4 bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 hover:from-gray-100 dark:hover:from-gray-700 transition-all duration-300"
+                        className="w-full flex items-center px-4 py-3 md:px-6 md:py-4 bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 hover:from-gray-100 dark:hover:from-gray-700 transition-all duration-300"
                     >
                         <div className={clsx("p-1 rounded-full transition-transform duration-300", expandedDialects[dialect] ? "rotate-90 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600" : "text-gray-400")}>
-                            <ChevronRight size={20} />
+                            <ChevronRight size={18} className="md:w-5 md:h-5" />
                         </div>
-                        <span className="ml-3 font-bold text-lg text-gray-800 dark:text-gray-100">{dialect}</span>
-                        <span className="ml-auto text-xs font-medium px-3 py-1 bg-gray-100 dark:bg-gray-800 rounded-full text-gray-500 border border-gray-200 dark:border-gray-700">
+                        <span className="ml-2 md:ml-3 font-bold text-base md:text-lg text-gray-800 dark:text-gray-100">{dialect}</span>
+                        <span className="ml-auto text-[10px] md:text-xs font-medium px-2 py-0.5 md:px-3 md:py-1 bg-gray-100 dark:bg-gray-800 rounded-full text-gray-500 border border-gray-200 dark:border-gray-700">
                             {Object.values(categories).flat().length} entries
                         </span>
                     </button>
@@ -98,14 +98,14 @@ export const EntryList: React.FC<EntryListProps> = ({ onEdit }) => {
                                 <div key={category} className="mb-2 last:mb-0">
                                     <button
                                         onClick={() => toggleCategory(`${dialect}-${category}`)}
-                                        className="w-full flex items-center px-4 py-3 hover:bg-white/60 dark:hover:bg-gray-800/60 rounded-xl transition-all group"
+                                        className="w-full flex items-center px-3 py-2 md:px-4 md:py-3 hover:bg-white/60 dark:hover:bg-gray-800/60 rounded-xl transition-all group"
                                     >
-                                        <div className={clsx("mr-3 transition-transform duration-200", expandedCategories[`${dialect}-${category}`] ? "rotate-90 text-emerald-500" : "text-gray-400 group-hover:text-gray-600")}>
-                                            <ChevronRight size={16} />
+                                        <div className={clsx("mr-2 md:mr-3 transition-transform duration-200", expandedCategories[`${dialect}-${category}`] ? "rotate-90 text-emerald-500" : "text-gray-400 group-hover:text-gray-600")}>
+                                            <ChevronRight size={14} className="md:w-4 md:h-4" />
                                         </div>
-                                        <Folder size={18} className="mr-3 text-emerald-500/80 group-hover:text-emerald-500 transition-colors" />
-                                        <span className="font-medium text-gray-700 dark:text-gray-200">{category}</span>
-                                        <span className="ml-auto text-xs text-gray-400">{categoryEntries.length}</span>
+                                        <Folder size={16} className="mr-2 md:mr-3 text-emerald-500/80 group-hover:text-emerald-500 transition-colors md:w-[18px] md:h-[18px]" />
+                                        <span className="font-medium text-sm md:text-base text-gray-700 dark:text-gray-200">{category}</span>
+                                        <span className="ml-auto text-[10px] md:text-xs text-gray-400">{categoryEntries.length}</span>
                                     </button>
 
                                     <div className={clsx("transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] overflow-hidden", expandedCategories[`${dialect}-${category}`] ? "max-h-[5000px] opacity-100" : "max-h-0 opacity-0")}>
@@ -147,16 +147,16 @@ export const EntryList: React.FC<EntryListProps> = ({ onEdit }) => {
                                                                     <div className="flex gap-2">
                                                                         <button
                                                                             onClick={() => onEdit(entry)}
-                                                                            className="px-4 py-2 text-sm font-medium text-emerald-600 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400 dark:hover:bg-emerald-900/30 rounded-lg transition-colors"
+                                                                            className="px-3 py-1.5 md:px-4 md:py-2 text-xs md:text-sm font-medium text-emerald-600 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400 dark:hover:bg-emerald-900/30 rounded-lg transition-colors"
                                                                         >
                                                                             Edit
                                                                         </button>
                                                                         <button
                                                                             onClick={(e) => handleDelete(entry.id, e)}
-                                                                            className="px-3 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+                                                                            className="px-2.5 py-1.5 md:px-3 md:py-2 text-xs md:text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30 rounded-lg transition-colors"
                                                                             title="Delete Entry"
                                                                         >
-                                                                            <Trash2 size={18} />
+                                                                            <Trash2 size={16} className="md:w-[18px] md:h-[18px]" />
                                                                         </button>
                                                                     </div>
                                                                 </div>
@@ -218,7 +218,7 @@ export const EntryList: React.FC<EntryListProps> = ({ onEdit }) => {
                                                             <button
                                                                 onClick={(e) => toggleEntry(entry.id, e)}
                                                                 className={clsx(
-                                                                    "group flex items-center gap-3 px-5 py-3 rounded-full border transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]",
+                                                                    "group flex items-center gap-3 px-4 py-3 md:px-5 md:py-3 rounded-full border transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]",
                                                                     "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700",
                                                                     "hover:border-emerald-500 hover:shadow-md hover:scale-105",
                                                                     entry.type === 'word' ? "hover:bg-blue-50/50 dark:hover:bg-blue-900/20" :
@@ -227,11 +227,11 @@ export const EntryList: React.FC<EntryListProps> = ({ onEdit }) => {
                                                                 )}
                                                             >
                                                                 <div className="flex flex-col items-start">
-                                                                    <span className="font-arabic font-bold text-lg text-gray-800 dark:text-gray-200 leading-none mb-0.5">{entry.term}</span>
-                                                                    <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">{entry.translation}</span>
+                                                                    <span className="font-arabic font-bold text-base md:text-lg text-gray-800 dark:text-gray-200 leading-none mb-0.5">{entry.term}</span>
+                                                                    <span className="text-[10px] md:text-xs text-gray-500 dark:text-gray-400 font-medium">{entry.translation}</span>
                                                                 </div>
                                                                 <span className={clsx(
-                                                                    "w-2 h-2 rounded-full shrink-0",
+                                                                    "w-1.5 h-1.5 md:w-2 md:h-2 rounded-full shrink-0",
                                                                     entry.type === 'word' ? "bg-blue-400" :
                                                                         entry.type === 'phrase' ? "bg-purple-400" :
                                                                             "bg-gray-400"

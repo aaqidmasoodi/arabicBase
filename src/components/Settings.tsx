@@ -1,11 +1,16 @@
 import React, { useState } from 'react';
 import { useStore } from '../store/useStore';
-import { Trash2, Settings as SettingsIcon, Globe, Tag } from 'lucide-react';
+import { supabase } from '../services/supabase';
+import { Trash2, Settings as SettingsIcon, Globe, Tag, LogOut } from 'lucide-react';
 
 export const Settings: React.FC = () => {
-    const { dialects, categories, addDialect, removeDialect, addCategory, removeCategory } = useStore();
+    const { dialects, categories, addDialect, removeDialect, addCategory, removeCategory, user } = useStore();
     const [newDialect, setNewDialect] = useState('');
     const [newCategory, setNewCategory] = useState('');
+
+    const handleLogout = async () => {
+        await supabase.auth.signOut();
+    };
 
     const handleAddDialect = (e: React.FormEvent) => {
         e.preventDefault();
@@ -32,10 +37,37 @@ export const Settings: React.FC = () => {
                     </div>
                     <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Configuration</h2>
                 </div>
-                <p className="text-gray-500 dark:text-gray-400">Manage the available options for your entries. These settings directly affect the Entry Form.</p>
+                <p className="text-gray-500 dark:text-gray-400">Manage your profile and application settings.</p>
             </div>
 
             <div className="space-y-10">
+                {/* User Profile Section */}
+                {user && (
+                    <section>
+                        <div className="flex items-center gap-2 mb-4">
+                            <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 font-bold text-sm">
+                                {user.email?.[0].toUpperCase()}
+                            </div>
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Profile</h3>
+                        </div>
+
+                        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden p-6">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Signed in as</p>
+                                    <p className="text-lg font-medium text-gray-900 dark:text-white">{user.email}</p>
+                                </div>
+                                <button
+                                    onClick={handleLogout}
+                                    className="flex items-center px-4 py-2 text-red-600 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+                                >
+                                    <LogOut size={18} className="mr-2" />
+                                    Sign Out
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+                )}
                 {/* Dialects Section */}
                 <section>
                     <div className="flex items-center gap-2 mb-4">
@@ -56,7 +88,7 @@ export const Settings: React.FC = () => {
                                 <button
                                     type="submit"
                                     disabled={!newDialect.trim()}
-                                    className="px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    className="px-3 py-2 md:px-4 text-white text-xs md:text-sm font-medium rounded-lg bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                 >
                                     Add
                                 </button>
@@ -103,7 +135,7 @@ export const Settings: React.FC = () => {
                                 <button
                                     type="submit"
                                     disabled={!newCategory.trim()}
-                                    className="px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    className="px-3 py-2 md:px-4 text-white text-xs md:text-sm font-medium rounded-lg bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                 >
                                     Add
                                 </button>
