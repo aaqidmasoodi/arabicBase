@@ -52,14 +52,14 @@ export const Settings: React.FC = () => {
                         </div>
 
                         <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden p-6">
-                            <div className="flex items-center justify-between">
+                            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                                 <div>
                                     <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Signed in as</p>
-                                    <p className="text-lg font-medium text-gray-900 dark:text-white">{user.email}</p>
+                                    <p className="text-lg font-medium text-gray-900 dark:text-white break-all">{user.email}</p>
                                 </div>
                                 <button
                                     onClick={handleLogout}
-                                    className="flex items-center px-4 py-2 text-red-600 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+                                    className="flex items-center justify-center w-full sm:w-auto px-4 py-2 text-red-600 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30 rounded-lg transition-colors"
                                 >
                                     <LogOut size={18} className="mr-2" />
                                     Sign Out
