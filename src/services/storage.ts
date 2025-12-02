@@ -17,7 +17,7 @@ export const storage = {
             return [];
         }
 
-        return data.map((entry: any) => ({
+        return data.map((entry) => ({
             ...entry,
             createdAt: new Date(entry.created_at).getTime(),
             updatedAt: new Date(entry.updated_at).getTime(),
@@ -38,7 +38,7 @@ export const storage = {
             return [];
         }
 
-        return data.map((entry: any) => ({
+        return data.map((entry) => ({
             ...entry,
             createdAt: new Date(entry.created_at).getTime(),
             updatedAt: new Date(entry.updated_at).getTime(),
@@ -158,7 +158,7 @@ export const storage = {
             console.error('Error fetching dialects:', error);
             return [];
         }
-        return data.map((d: any) => d.dialects.name);
+        return data.map((d) => (d.dialects as unknown as { name: string }).name);
     },
 
     async addDialect(name: string): Promise<void> {
@@ -219,7 +219,7 @@ export const storage = {
             console.error('Error fetching categories:', error);
             return [];
         }
-        return data.map((c: any) => c.categories.name);
+        return data.map((c) => (c.categories as unknown as { name: string }).name);
     },
 
     async addCategory(name: string): Promise<void> {
@@ -368,7 +368,7 @@ export const storage = {
             return {};
         }
 
-        return data.reduce((acc: any, vote: any) => {
+        return data.reduce((acc: Record<string, 'up' | 'down'>, vote) => {
             acc[vote.entry_id] = vote.vote_type;
             return acc;
         }, {});

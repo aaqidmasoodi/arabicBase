@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import type { User } from '@supabase/supabase-js';
 import type { Entry } from '../types/entry';
 import { storage } from '../services/storage';
 import { groqService } from '../services/groq';
@@ -6,8 +7,8 @@ import { groqService } from '../services/groq';
 interface AppState {
     newlyAddedEntryId: string | null;
     clearNewlyAddedEntryId: () => void;
-    user: any | null;
-    setUser: (user: any | null) => void;
+    user: User | null;
+    setUser: (user: User | null) => void;
     entries: Entry[];
     dialects: string[];
     categories: string[];

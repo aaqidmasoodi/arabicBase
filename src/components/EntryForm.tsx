@@ -177,7 +177,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ initialEntry, onClose }) =
                                 <button
                                     key={type}
                                     type="button"
-                                    onClick={() => setFormData({ ...formData, type: type as any })}
+                                    onClick={() => setFormData({ ...formData, type: type as Entry['type'] })}
                                     className={clsx(
                                         "px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 border",
                                         formData.type === type

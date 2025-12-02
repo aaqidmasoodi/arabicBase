@@ -1,4 +1,4 @@
-// @ts-nocheck
+// @ts-expect-error Deno imports are not supported in this context
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import Stripe from 'https://esm.sh/stripe@12.0.0'
@@ -30,13 +30,14 @@ serve(async (req: Request) => {
                 undefined,
                 cryptoProvider
             );
-        } catch (err: any) {
-            console.error(`Webhook signature verification failed.`, err.message);
-            return new Response(err.message, { status: 400 });
+        } catch (err: unknown) {
+            const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+            console.error(`Webhook signature verification failed.`, errorMessage);
+            return new Response(errorMessage, { status: 400 });
         }
 
         if (event.type === 'checkout.session.completed') {
-            const session = event.data.object
+            const session = event.data.object as Stripe.Checkout.Session
             const userId = session.client_reference_id
             const customerId = session.customer
 
@@ -64,8 +65,9 @@ serve(async (req: Request) => {
         return new Response(JSON.stringify({ received: true }), {
             headers: { 'Content-Type': 'application/json' },
         })
-    } catch (err: any) {
+    } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : 'Unknown error';
         console.error(err)
-        return new Response(err.message, { status: 400 })
+        return new Response(errorMessage, { status: 400 })
     }
 })
