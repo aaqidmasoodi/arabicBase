@@ -3,9 +3,13 @@ import type { Entry } from '../types/entry';
 
 export const storage = {
     async getAllEntries(): Promise<Entry[]> {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return [];
+
         const { data, error } = await supabase
             .from('entries')
             .select('*')
+            .eq('user_id', user.id)
             .order('created_at', { ascending: false });
 
         if (error) {

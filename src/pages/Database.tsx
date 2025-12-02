@@ -156,6 +156,11 @@ export const Database: React.FC = () => {
         } else {
             const entry = globalEntries.find(e => e.id === id);
             if (entry) {
+                // If I own this entry and it has no insights, generate them
+                if (user && entry.userId === user.id && !entry.hasAiInsights) {
+                    useStore.getState().enrichEntry(entry);
+                }
+
                 const slug = createSlug(entry.transliteration || entry.term);
                 navigate(`/dictionary/${entry.dialect}/${slug}?entry=${entry.id}`);
             }
