@@ -33,13 +33,24 @@ interface AppState {
     isPro: boolean;
     checkLimit: () => boolean;
     loadProfile: (userId: string) => Promise<void>;
+    voteEntry: (id: string, type: 'up' | 'down') => Promise<void>;
+    userVotes: Record<string, 'up' | 'down'>;
+    loadUserVotes: () => Promise<void>;
 }
 
 export const useStore = create<AppState>((set, get) => ({
     newlyAddedEntryId: null,
     clearNewlyAddedEntryId: () => set({ newlyAddedEntryId: null }),
     user: null,
-    setUser: (user) => set({ user }),
+    setUser: (user) => {
+        set({ user });
+        if (user) {
+            get().loadUserVotes();
+        } else {
+            set({ userVotes: {} });
+        }
+    },
+    userVotes: {},
     entries: [],
     dialects: [],
     categories: [],
@@ -324,5 +335,69 @@ export const useStore = create<AppState>((set, get) => ({
             categories: state.categories.filter(c => c !== name),
             entries: state.entries.filter(e => e.category !== name)
         }));
+    },
+
+    voteEntry: async (id, type) => {
+        const { user, userVotes } = get();
+        if (!user) return;
+
+        const currentVote = userVotes[id];
+        const isRemoving = currentVote === type; // Toggle off if same type
+
+        // 1. Optimistic update
+        set(state => {
+            const newVotes = { ...state.userVotes };
+            if (isRemoving) {
+                delete newVotes[id];
+            } else {
+                newVotes[id] = type;
+            }
+
+            return {
+                userVotes: newVotes,
+                globalEntries: state.globalEntries.map(entry => {
+                    if (entry.id !== id) return entry;
+
+                    let upvotes = entry.upvotes || 0;
+                    let downvotes = entry.downvotes || 0;
+
+                    if (isRemoving) {
+                        // Remove existing vote
+                        if (type === 'up') upvotes--;
+                        else downvotes--;
+                    } else {
+                        // Add new vote
+                        if (type === 'up') upvotes++;
+                        else downvotes++;
+
+                        // Remove old vote if switching (e.g. down -> up)
+                        if (currentVote) {
+                            if (currentVote === 'up') upvotes--;
+                            else downvotes--;
+                        }
+                    }
+
+                    return { ...entry, upvotes, downvotes };
+                })
+            };
+        });
+
+        // 2. Call API
+        try {
+            if (isRemoving) {
+                await storage.removeVote(id);
+            } else {
+                await storage.voteEntry(id, type);
+            }
+        } catch (error) {
+            // Revert on error (simplified: just reload global entries to sync)
+            console.error('Vote failed:', error);
+            get().loadGlobalEntries();
+        }
+    },
+
+    loadUserVotes: async () => {
+        const votes = await storage.getUserVotes();
+        set({ userVotes: votes });
     },
 }));

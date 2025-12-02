@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useStore } from '../store/useStore';
-import { Search, Globe, Plus, Check, X, Folder, Tag, Sparkles } from 'lucide-react';
+import { Search, Globe, Plus, Check, X, Folder, Tag, Sparkles, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import clsx from 'clsx';
 import type { Entry } from '../types/entry';
@@ -16,7 +16,7 @@ const createSlug = (text: string) => {
 };
 
 export const Database: React.FC = () => {
-    const { globalEntries, loadGlobalEntries, loadGlobalData, forkEntry, user, globalDialects, globalCategories, globalConcepts, entries } = useStore();
+    const { globalEntries, loadGlobalEntries, loadGlobalData, forkEntry, user, globalDialects, globalCategories, globalConcepts, entries, voteEntry, userVotes } = useStore();
     const { dialect, term } = useParams();
     const navigate = useNavigate();
 
@@ -26,14 +26,30 @@ export const Database: React.FC = () => {
     const [selectedConcept, setSelectedConcept] = useState('All');
     const [forkedEntries, setForkedEntries] = useState<Set<string>>(new Set());
 
+    useEffect(() => {
+        loadGlobalEntries();
+        loadGlobalData();
+    }, [loadGlobalEntries, loadGlobalData]);
+
     // Derived state from URL params
     const expandedEntryId = useMemo(() => {
         if (!dialect || !term) return null;
-        const entry = globalEntries.find(e => {
+
+        // Find all matching entries
+        const matchingEntries = globalEntries.filter(e => {
             const entrySlug = createSlug(e.transliteration || e.term);
-            return e.dialect === dialect && entrySlug === term;
+            // Case-insensitive matching
+            return e.dialect.toLowerCase() === dialect.toLowerCase() &&
+                entrySlug === term.toLowerCase();
         });
-        return entry?.id || null;
+
+        if (matchingEntries.length === 0) return null;
+
+        // Sort by upvotes (descending) to find the "best" match
+        // If upvotes are equal, fallback to newest first (default order)
+        matchingEntries.sort((a, b) => (b.upvotes || 0) - (a.upvotes || 0));
+
+        return matchingEntries[0].id;
     }, [globalEntries, dialect, term]);
 
     useEffect(() => {
@@ -112,6 +128,19 @@ export const Database: React.FC = () => {
                 return next;
             });
         }, 2000);
+    };
+
+    const handleVote = async (entry: Entry, type: 'up' | 'down', e: React.MouseEvent) => {
+        e.stopPropagation();
+
+        if (!user) {
+            navigate('/login');
+            return;
+        }
+
+        if (userVotes[entry.id]) return; // Already voted
+
+        await voteEntry(entry.id, type);
     };
 
     const toggleEntry = (id: string, e: React.MouseEvent) => {
@@ -341,28 +370,61 @@ export const Database: React.FC = () => {
                                             ))}
                                         </div>
 
-                                        {user && entry.userId !== user.id && (
-                                            <button
-                                                onClick={(e) => handleFork(entry, e)}
-                                                disabled={isAdded}
-                                                className={clsx(
-                                                    "flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 font-medium text-sm",
-                                                    isAdded
-                                                        ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 cursor-default"
-                                                        : "bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-500/20"
-                                                )}
-                                            >
-                                                {isAdded ? (
-                                                    <>
-                                                        <Check size={16} /> {inLibrary ? 'In Knowledge Base' : 'Added'}
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <Plus size={16} /> Add to Knowledge Base
-                                                    </>
-                                                )}
-                                            </button>
-                                        )}
+                                        <div className="flex items-center gap-4">
+                                            {/* Voting UI */}
+                                            <div className="flex items-center gap-1 bg-gray-50 dark:bg-gray-800/50 rounded-lg p-1 border border-gray-100 dark:border-gray-700">
+                                                <button
+                                                    onClick={(e) => handleVote(entry, 'up', e)}
+                                                    className={clsx(
+                                                        "flex items-center gap-1.5 px-2 py-1.5 rounded-md transition-all text-xs font-medium",
+                                                        userVotes[entry.id] === 'up'
+                                                            ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                                                            : "text-gray-500 hover:bg-white dark:hover:bg-gray-700 hover:text-green-600 dark:hover:text-green-400 hover:shadow-sm"
+                                                    )}
+                                                    title="Helpful"
+                                                >
+                                                    <ThumbsUp size={14} className={clsx(userVotes[entry.id] === 'up' && "fill-current")} />
+                                                    <span>{entry.upvotes || 0}</span>
+                                                </button>
+                                                <div className="w-px h-4 bg-gray-200 dark:bg-gray-700"></div>
+                                                <button
+                                                    onClick={(e) => handleVote(entry, 'down', e)}
+                                                    className={clsx(
+                                                        "flex items-center gap-1.5 px-2 py-1.5 rounded-md transition-all text-xs font-medium",
+                                                        userVotes[entry.id] === 'down'
+                                                            ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                                                            : "text-gray-500 hover:bg-white dark:hover:bg-gray-700 hover:text-red-600 dark:hover:text-red-400 hover:shadow-sm"
+                                                    )}
+                                                    title="Not helpful"
+                                                >
+                                                    <ThumbsDown size={14} className={clsx(userVotes[entry.id] === 'down' && "fill-current")} />
+                                                    <span>{entry.downvotes || 0}</span>
+                                                </button>
+                                            </div>
+
+                                            {user && entry.userId !== user.id && (
+                                                <button
+                                                    onClick={(e) => handleFork(entry, e)}
+                                                    disabled={isAdded}
+                                                    className={clsx(
+                                                        "flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 font-medium text-sm",
+                                                        isAdded
+                                                            ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 cursor-default"
+                                                            : "bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-500/20"
+                                                    )}
+                                                >
+                                                    {isAdded ? (
+                                                        <>
+                                                            <Check size={16} /> {inLibrary ? 'In Knowledge Base' : 'Added'}
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <Plus size={16} /> Add to Knowledge Base
+                                                        </>
+                                                    )}
+                                                </button>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             ) : (

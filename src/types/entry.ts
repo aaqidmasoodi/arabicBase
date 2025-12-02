@@ -17,6 +17,8 @@ export interface Entry {
     };
     hasAiInsights?: boolean;
     userId?: string;
+    upvotes?: number;
+    downvotes?: number;
     createdAt: number;
     updatedAt: number;
 }

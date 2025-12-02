@@ -314,5 +314,59 @@ export const storage = {
             return [];
         }
         return data.map(c => c.name);
+    },
+
+    async voteEntry(entryId: string, voteType: 'up' | 'down'): Promise<void> {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('User not authenticated');
+
+        const { error } = await supabase
+            .from('entry_votes')
+            .upsert({
+                user_id: user.id,
+                entry_id: entryId,
+                vote_type: voteType
+            });
+
+        if (error) {
+            console.error('Error voting on entry:', error);
+            throw error;
+        }
+    },
+
+    async removeVote(entryId: string): Promise<void> {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('User not authenticated');
+
+        const { error } = await supabase
+            .from('entry_votes')
+            .delete()
+            .eq('user_id', user.id)
+            .eq('entry_id', entryId);
+
+        if (error) {
+            console.error('Error removing vote:', error);
+            throw error;
+        }
+    },
+
+    async getUserVotes(): Promise<Record<string, 'up' | 'down'>> {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return {};
+
+        const { data, error } = await supabase
+            .from('entry_votes')
+            .select('entry_id, vote_type')
+            .eq('user_id', user.id);
+
+        if (error) {
+            console.error('Error fetching user votes:', error);
+            return {};
+        }
+
+        return data.reduce((acc: any, vote: any) => {
+            acc[vote.entry_id] = vote.vote_type;
+            return acc;
+        }, {});
     }
 };
