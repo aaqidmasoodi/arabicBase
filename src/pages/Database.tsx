@@ -226,7 +226,10 @@ export const Database: React.FC = () => {
 
 
             {/* Search and Filter Bar */}
-            <div className="sticky top-16 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl p-3 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-lg mb-6 transition-all duration-300">
+            <div className={clsx(
+                "sticky z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl p-3 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-lg mb-6 transition-all duration-300",
+                user ? "top-4" : "top-20 md:top-24"
+            )}>
                 <div className="flex flex-col gap-3">
                     <div className="flex flex-col md:flex-row gap-3 items-center">
                         {/* Compact Header Integration */}
@@ -386,7 +389,7 @@ export const Database: React.FC = () => {
                                         )}
                                     </div>
 
-                                    <div className="flex justify-between items-center border-t border-gray-100 dark:border-gray-700 pt-4">
+                                    <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 border-t border-gray-100 dark:border-gray-700 pt-4">
                                         <div className="flex gap-2 flex-wrap">
                                             <span className="flex items-center text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2.5 py-1 rounded-full">
                                                 <Folder size={12} className="mr-1.5 opacity-70" /> {entry.category}
