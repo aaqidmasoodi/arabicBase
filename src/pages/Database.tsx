@@ -5,7 +5,7 @@ import { Helmet } from 'react-helmet-async';
 import clsx from 'clsx';
 import type { Entry } from '../types/entry';
 
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 
 // Helper to create URL-friendly slugs
 const createSlug = (text: string) => {
@@ -18,6 +18,7 @@ const createSlug = (text: string) => {
 export const Database: React.FC = () => {
     const { globalEntries, loadGlobalEntries, loadGlobalData, forkEntry, user, globalDialects, globalCategories, globalConcepts, entries, voteEntry, userVotes } = useStore();
     const { dialect, term } = useParams();
+    const [searchParams] = useSearchParams();
     const navigate = useNavigate();
 
     const [searchTerm, setSearchTerm] = useState('');
@@ -35,7 +36,14 @@ export const Database: React.FC = () => {
     const expandedEntryId = useMemo(() => {
         if (!dialect || !term) return null;
 
-        // Find all matching entries
+        // 1. If specific ID is provided in query params, try to find it
+        const entryIdParam = searchParams.get('entry');
+        if (entryIdParam) {
+            const specificEntry = globalEntries.find(e => e.id === entryIdParam);
+            if (specificEntry) return specificEntry.id;
+        }
+
+        // 2. Fallback: Find all matching entries by slug
         const matchingEntries = globalEntries.filter(e => {
             const entrySlug = createSlug(e.transliteration || e.term);
             // Case-insensitive matching
@@ -50,7 +58,7 @@ export const Database: React.FC = () => {
         matchingEntries.sort((a, b) => (b.upvotes || 0) - (a.upvotes || 0));
 
         return matchingEntries[0].id;
-    }, [globalEntries, dialect, term]);
+    }, [globalEntries, dialect, term, searchParams]);
 
     useEffect(() => {
         loadGlobalEntries();
@@ -81,7 +89,7 @@ export const Database: React.FC = () => {
                     "value": entry.translation
                 },
                 "additionalType": entry.dialect,
-                "url": `${window.location.origin}/dictionary/${entry.dialect}/${createSlug(entry.transliteration || entry.term)}`
+                "url": `${window.location.origin}/dictionary/${entry.dialect}/${createSlug(entry.transliteration || entry.term)}?entry=${entry.id}`
             }))
         };
         return JSON.stringify(schema);
@@ -149,7 +157,7 @@ export const Database: React.FC = () => {
             const entry = globalEntries.find(e => e.id === id);
             if (entry) {
                 const slug = createSlug(entry.transliteration || entry.term);
-                navigate(`/dictionary/${entry.dialect}/${slug}`);
+                navigate(`/dictionary/${entry.dialect}/${slug}?entry=${entry.id}`);
             }
         }
     };
