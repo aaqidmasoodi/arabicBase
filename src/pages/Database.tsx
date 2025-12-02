@@ -138,8 +138,6 @@ export const Database: React.FC = () => {
             return;
         }
 
-        if (userVotes[entry.id]) return; // Already voted
-
         await voteEntry(entry.id, type);
     };
 
