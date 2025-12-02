@@ -13,6 +13,10 @@ import { Plus } from 'lucide-react';
 import type { Entry } from './types/entry';
 import { UpgradeModal } from './components/UpgradeModal';
 import { PublicLayout } from './components/PublicLayout';
+import { PrivacyPolicy } from './pages/PrivacyPolicy';
+import { TermsOfService } from './pages/TermsOfService';
+import { CookieConsent } from './components/CookieConsent';
+import { ScrollToTop } from './components/ScrollToTop';
 import { Navigate } from 'react-router-dom';
 
 
@@ -120,6 +124,8 @@ function App() {
                       <Route path="/library" element={<EntryList onEdit={handleEdit} />} />
                       <Route path="/explore" element={<Explore onEdit={handleEdit} />} />
                       <Route path="/settings" element={<Settings />} />
+                      <Route path="/privacy" element={<PrivacyPolicy />} />
+                      <Route path="/terms" element={<TermsOfService />} />
                     </Routes>
                   </div>
 
@@ -136,6 +142,8 @@ function App() {
                 <Routes>
                   <Route path="/" element={<Database />} />
                   <Route path="/dictionary/:dialect/:term" element={<Database />} />
+                  <Route path="/privacy" element={<PrivacyPolicy />} />
+                  <Route path="/terms" element={<TermsOfService />} />
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
               </PublicLayout>
@@ -144,6 +152,8 @@ function App() {
         />
       </Routes>
       {isUpgradeOpen && <UpgradeModal onClose={() => setIsUpgradeOpen(false)} />}
+      <CookieConsent />
+      <ScrollToTop />
     </>
   );
 }

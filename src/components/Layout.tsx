@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, Link } from 'react-router-dom';
 import { LayoutGrid, Globe, Settings, Moon, Sun, Sparkles, Crown, Database } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import clsx from 'clsx';
@@ -21,12 +21,12 @@ export const Layout: React.FC<LayoutProps> = ({ children, onUpgrade }) => {
 
                 {/* Mobile Top Bar */}
                 <header className="md:hidden h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4 z-20 shrink-0">
-                    <div className="flex items-center">
+                    <Link to="/" className="flex items-center hover:opacity-80 transition-opacity">
                         <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-teal-600 rounded-lg flex items-center justify-center shadow-lg shadow-emerald-500/20">
                             <span className="text-white font-bold text-lg">ع</span>
                         </div>
                         <span className="ml-2 font-bold text-lg text-gray-800 dark:text-white tracking-tight">Arabic<span className="text-emerald-500">Base</span></span>
-                    </div>
+                    </Link>
                     <div className="flex items-center gap-2">
                         {!isPro && (
                             <>
@@ -53,10 +53,12 @@ export const Layout: React.FC<LayoutProps> = ({ children, onUpgrade }) => {
                 {/* Desktop Sidebar */}
                 <aside className="hidden md:flex w-20 lg:w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex-col transition-all duration-300 z-20">
                     <div className="h-20 flex items-center justify-center lg:justify-start lg:px-6 border-b border-gray-100 dark:border-gray-700/50">
-                        <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-teal-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
-                            <span className="text-white font-bold text-xl">ع</span>
-                        </div>
-                        <span className="hidden lg:block ml-3 font-bold text-xl text-gray-800 dark:text-white tracking-tight">Arabic<span className="text-emerald-500">Base</span></span>
+                        <Link to="/" className="flex items-center hover:opacity-80 transition-opacity">
+                            <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-teal-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                                <span className="text-white font-bold text-xl">ع</span>
+                            </div>
+                            <span className="hidden lg:block ml-3 font-bold text-xl text-gray-800 dark:text-white tracking-tight">Arabic<span className="text-emerald-500">Base</span></span>
+                        </Link>
                     </div>
 
                     <nav className="flex-1 py-6 px-3 space-y-2">
@@ -176,6 +178,13 @@ export const Layout: React.FC<LayoutProps> = ({ children, onUpgrade }) => {
                 <main className="flex-1 overflow-y-auto bg-gray-50/50 dark:bg-gray-900/50 relative">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24 md:pb-8">
                         {children}
+                    </div>
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left text-gray-500 dark:text-gray-400 text-sm">
+                        <p>&copy; {new Date().getFullYear()} ArabicBase. All rights reserved.</p>
+                        <div className="flex gap-6">
+                            <Link to="/privacy" className="hover:text-gray-900 dark:hover:text-white transition-colors">Privacy Policy</Link>
+                            <Link to="/terms" className="hover:text-gray-900 dark:hover:text-white transition-colors">Terms of Service</Link>
+                        </div>
                     </div>
                 </main>
 
