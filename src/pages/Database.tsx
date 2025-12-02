@@ -300,12 +300,12 @@ export const Database: React.FC = () => {
                         {globalConcepts.map(concept => (
                             <button
                                 key={concept}
-                                onClick={() => setSelectedConcept(selectedConcept === concept ? 'All' : concept)} // Toggle
+                                onClick={() => setSelectedConcept(selectedConcept === concept ? 'All' : concept)}
                                 className={clsx(
-                                    "px-3 py-1 rounded-full text-xs font-medium transition-all shrink-0 border",
+                                    "px-3 py-1 rounded-full text-xs font-medium transition-all shrink-0 border shadow-sm",
                                     selectedConcept === concept
-                                        ? "bg-indigo-100 text-indigo-700 border-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-800"
-                                        : "bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700 dark:hover:bg-gray-700"
+                                        ? "bg-indigo-600 text-white border-indigo-600 shadow-indigo-500/30"
+                                        : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50 hover:border-gray-300 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700 dark:hover:bg-gray-700"
                                 )}
                             >
                                 {concept}
@@ -341,27 +341,29 @@ export const Database: React.FC = () => {
 
                                     <div className="flex flex-col sm:flex-row sm:items-start gap-4 mb-4">
                                         <div className="flex-1">
-                                            <div className="flex items-center gap-3 mb-1">
-                                                <h3 className="font-bold text-3xl font-arabic text-gray-900 dark:text-gray-50">{entry.term}</h3>
+                                            <div className="flex flex-wrap items-center gap-2 mb-1">
+                                                <h3 className="font-bold text-2xl md:text-3xl font-arabic text-gray-900 dark:text-gray-50 break-words break-all leading-relaxed">
+                                                    {entry.term}
+                                                </h3>
                                                 <span className={clsx(
-                                                    "text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-md border",
-                                                    entry.type === 'word' ? "bg-blue-50 text-blue-700 border-blue-100 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800" :
-                                                        entry.type === 'phrase' ? "bg-purple-50 text-purple-700 border-purple-100 dark:bg-purple-900/20 dark:text-purple-300 dark:border-purple-800" :
-                                                            "bg-gray-50 text-gray-700 border-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700"
+                                                    "text-[10px] uppercase tracking-wider font-bold px-1.5 py-0.5 rounded-full border shadow-sm",
+                                                    entry.type === 'word' ? "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800" :
+                                                        entry.type === 'phrase' ? "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-800" :
+                                                            "bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700"
                                                 )}>
                                                     {entry.type}
                                                 </span>
                                             </div>
-                                            <p className="text-lg text-indigo-600 dark:text-indigo-400 font-medium">{entry.transliteration}</p>
+                                            <p className="text-base md:text-lg text-indigo-600 dark:text-indigo-400 font-medium break-words">{entry.transliteration}</p>
                                         </div>
-                                        <div className="flex items-center gap-2 px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-full self-start">
-                                            <Globe size={14} className="text-gray-500 dark:text-gray-400" />
-                                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{entry.dialect}</span>
+                                        <div className="flex items-center gap-1.5 px-2 py-0.5 md:px-3 md:py-1 bg-gray-100 dark:bg-gray-700 rounded-full self-start shrink-0">
+                                            <Globe size={12} className="text-gray-500 dark:text-gray-400 md:w-[14px] md:h-[14px]" />
+                                            <span className="text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300">{entry.dialect}</span>
                                         </div>
                                     </div>
 
-                                    <div className="prose dark:prose-invert max-w-none mb-6">
-                                        <p className="text-xl text-gray-700 dark:text-gray-300 border-l-4 border-indigo-500 pl-4 py-1 bg-gray-50 dark:bg-gray-800/50 rounded-r-lg">
+                                    <div className="prose dark:prose-invert max-w-none mb-4 md:mb-6">
+                                        <p className="text-lg md:text-xl text-gray-700 dark:text-gray-300 border-l-4 border-indigo-500 pl-3 md:pl-4 py-1 bg-gray-50 dark:bg-gray-800/50 rounded-r-lg break-words">
                                             {entry.translation}
                                         </p>
 
@@ -518,6 +520,6 @@ export const Database: React.FC = () => {
                     </div>
                 )}
             </div>
-        </div>
+        </div >
     );
 };

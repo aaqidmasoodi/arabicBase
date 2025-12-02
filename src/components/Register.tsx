@@ -5,7 +5,7 @@ import { useStore } from '../store/useStore';
 import { Mail, Lock, Loader2, ArrowRight, Sparkles } from 'lucide-react';
 import clsx from 'clsx';
 
-export const Login: React.FC = () => {
+export const Register: React.FC = () => {
     const navigate = useNavigate();
     const { user, theme } = useStore();
     const [email, setEmail] = useState('');
@@ -19,17 +19,18 @@ export const Login: React.FC = () => {
         }
     }, [user, navigate]);
 
-    const handleLogin = async (e: React.FormEvent) => {
+    const handleSignUp = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setError(null);
 
         try {
-            const { error } = await supabase.auth.signInWithPassword({
+            const { error } = await supabase.auth.signUp({
                 email,
                 password,
             });
             if (error) throw error;
+            alert('Check your email for the confirmation link!');
         } catch (err: unknown) {
             if (err instanceof Error) {
                 setError(err.message);
@@ -79,10 +80,10 @@ export const Login: React.FC = () => {
                         <Sparkles size={24} />
                     </div>
                     <h1 className="text-4xl font-bold mb-3 tracking-tight">
-                        Welcome Back
+                        Join the Community
                     </h1>
                     <p className="text-gray-500 dark:text-gray-400 text-lg">
-                        Your personal Arabic knowledge base awaits.
+                        Start your journey to fluency today.
                     </p>
                 </div>
 
@@ -94,7 +95,7 @@ export const Login: React.FC = () => {
                         </div>
                     )}
 
-                    <form onSubmit={handleLogin} className="space-y-5 mb-8">
+                    <form onSubmit={handleSignUp} className="space-y-5 mb-8">
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-gray-700 dark:text-gray-300 ml-1">Email Address</label>
                             <div className="relative group">
@@ -131,7 +132,7 @@ export const Login: React.FC = () => {
                         >
                             {loading ? <Loader2 className="animate-spin" size={20} /> : (
                                 <>
-                                    Sign In
+                                    Create Account
                                     <ArrowRight size={18} />
                                 </>
                             )}
@@ -157,12 +158,12 @@ export const Login: React.FC = () => {
 
                     <div className="mt-8 text-center">
                         <p className="text-gray-500 dark:text-gray-400 text-sm">
-                            Don't have an account?
+                            Already have an account?
                             <Link
-                                to="/register"
+                                to="/login"
                                 className="ml-2 text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-semibold transition-colors"
                             >
-                                Sign up
+                                Sign in
                             </Link>
                         </p>
                     </div>

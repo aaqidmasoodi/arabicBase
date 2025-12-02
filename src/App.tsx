@@ -7,6 +7,7 @@ import { Explore } from './components/Explore';
 import { Database } from './pages/Database';
 import { Settings } from './components/Settings';
 import { Login } from './components/Login';
+import { Register } from './components/Register';
 import { useStore } from './store/useStore';
 import { supabase } from './services/supabase';
 import { Plus } from 'lucide-react';
@@ -91,6 +92,7 @@ function App() {
     <>
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
         <Route
           path="*"

@@ -35,7 +35,7 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
                         <Link to="/login" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium">
                             Log in
                         </Link>
-                        <Link to="/login" className="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg font-medium transition-colors shadow-sm shadow-emerald-500/20">
+                        <Link to="/register" className="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg font-medium transition-colors shadow-sm shadow-emerald-500/20">
                             Get Started
                         </Link>
                     </div>
@@ -71,7 +71,7 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
                             Log in
                         </Link>
                         <Link
-                            to="/login"
+                            to="/register"
                             className="block w-full text-center py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg font-medium transition-colors shadow-sm shadow-emerald-500/20"
                             onClick={() => setIsMobileMenuOpen(false)}
                         >
