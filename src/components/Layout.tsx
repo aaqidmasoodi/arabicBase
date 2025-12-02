@@ -176,14 +176,16 @@ export const Layout: React.FC<LayoutProps> = ({ children, onUpgrade }) => {
 
                 {/* Main Content */}
                 <main className="flex-1 overflow-y-auto bg-gray-50/50 dark:bg-gray-900/50 relative">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24 md:pb-8">
-                        {children}
-                    </div>
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left text-gray-500 dark:text-gray-400 text-sm">
-                        <p>&copy; {new Date().getFullYear()} ArabicBase. All rights reserved.</p>
-                        <div className="flex gap-6">
-                            <Link to="/privacy" className="hover:text-gray-900 dark:hover:text-white transition-colors">Privacy Policy</Link>
-                            <Link to="/terms" className="hover:text-gray-900 dark:hover:text-white transition-colors">Terms of Service</Link>
+                    <div className="flex flex-col min-h-full">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24 md:pb-8 flex-1 w-full">
+                            {children}
+                        </div>
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left text-gray-500 dark:text-gray-400 text-sm py-6 w-full mt-auto border-t border-gray-200 dark:border-gray-700">
+                            <p>&copy; {new Date().getFullYear()} ArabicBase. All rights reserved.</p>
+                            <div className="flex gap-6">
+                                <Link to="/privacy" className="hover:text-gray-900 dark:hover:text-white transition-colors">Privacy Policy</Link>
+                                <Link to="/terms" className="hover:text-gray-900 dark:hover:text-white transition-colors">Terms of Service</Link>
+                            </div>
                         </div>
                     </div>
                 </main>
