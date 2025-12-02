@@ -1,22 +1,75 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useStore } from '../store/useStore';
 import { Search, Globe, Plus, Check, X, Folder, Tag, Sparkles } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 import clsx from 'clsx';
 import type { Entry } from '../types/entry';
 
+import { useParams, useNavigate } from 'react-router-dom';
+
+// Helper to create URL-friendly slugs
+const createSlug = (text: string) => {
+    return text
+        .toLowerCase()
+        .replace(/[^a-z0-9\u0600-\u06FF]+/g, '-') // Allow Arabic chars
+        .replace(/^-+|-+$/g, '');
+};
+
 export const Database: React.FC = () => {
     const { globalEntries, loadGlobalEntries, loadGlobalData, forkEntry, user, globalDialects, globalCategories, globalConcepts, entries } = useStore();
+    const { dialect, term } = useParams();
+    const navigate = useNavigate();
+
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedDialect, setSelectedDialect] = useState('All');
     const [selectedCategory, setSelectedCategory] = useState('All');
     const [selectedConcept, setSelectedConcept] = useState('All');
     const [forkedEntries, setForkedEntries] = useState<Set<string>>(new Set());
-    const [expandedEntryId, setExpandedEntryId] = useState<string | null>(null);
+
+    // Derived state from URL params
+    const expandedEntryId = useMemo(() => {
+        if (!dialect || !term) return null;
+        const entry = globalEntries.find(e => {
+            const entrySlug = createSlug(e.transliteration || e.term);
+            return e.dialect === dialect && entrySlug === term;
+        });
+        return entry?.id || null;
+    }, [globalEntries, dialect, term]);
 
     useEffect(() => {
         loadGlobalEntries();
         loadGlobalData();
     }, [loadGlobalEntries, loadGlobalData]);
+
+    // Find the expanded entry object for SEO
+    const expandedEntry = useMemo(() =>
+        globalEntries.find(e => e.id === expandedEntryId),
+        [globalEntries, expandedEntryId]
+    );
+
+    // SEO: Generate JSON-LD Structured Data
+    const jsonLd = useMemo(() => {
+        const schema = {
+            "@context": "https://schema.org",
+            "@type": "DefinedTermSet",
+            "name": "ArabicBase Global Dictionary",
+            "description": "A comprehensive Arabic dictionary featuring Levantine, Egyptian, and MSA dialects.",
+            "inLanguage": "ar",
+            "hasDefinedTerm": globalEntries.slice(0, 20).map(entry => ({
+                "@type": "DefinedTerm",
+                "termCode": entry.term,
+                "name": entry.term,
+                "inDefinedTermSet": "ArabicBase",
+                "definition": {
+                    "@type": "Text",
+                    "value": entry.translation
+                },
+                "additionalType": entry.dialect,
+                "url": `${window.location.origin}/dictionary/${entry.dialect}/${createSlug(entry.transliteration || entry.term)}`
+            }))
+        };
+        return JSON.stringify(schema);
+    }, [globalEntries]);
 
     const filteredEntries = useMemo(() => {
         return globalEntries.filter(entry => {
@@ -63,11 +116,62 @@ export const Database: React.FC = () => {
 
     const toggleEntry = (id: string, e: React.MouseEvent) => {
         e.stopPropagation();
-        setExpandedEntryId(prev => prev === id ? null : id);
+        if (expandedEntryId === id) {
+            navigate('/');
+        } else {
+            const entry = globalEntries.find(e => e.id === id);
+            if (entry) {
+                const slug = createSlug(entry.transliteration || entry.term);
+                navigate(`/dictionary/${entry.dialect}/${slug}`);
+            }
+        }
     };
 
     return (
         <div className="container mx-auto px-4 py-8 max-w-7xl">
+            <Helmet>
+                <title>
+                    {expandedEntry
+                        ? `${expandedEntry.term} (${expandedEntry.dialect}) Meaning - ArabicBase`
+                        : "ArabicBase - Global Arabic Dictionary & Dialect Database"
+                    }
+                </title>
+                <meta
+                    name="description"
+                    content={expandedEntry
+                        ? `${expandedEntry.term} means "${expandedEntry.translation}" in ${expandedEntry.dialect}. ${expandedEntry.aiEnrichment?.exampleUsage || ''}`
+                        : "Explore thousands of Arabic words and phrases in Levantine, Egyptian, and MSA dialects. Build your personal knowledge base with AI-powered insights."
+                    }
+                />
+                <meta name="keywords" content="Arabic dictionary, Levantine Arabic, Egyptian Arabic, MSA, Arabic learning, dialect database" />
+
+                {/* Open Graph / Facebook */}
+                <meta property="og:type" content="website" />
+                <meta property="og:url" content={window.location.href} />
+                <meta property="og:title" content={expandedEntry
+                    ? `${expandedEntry.term} - ${expandedEntry.translation} (${expandedEntry.dialect})`
+                    : "ArabicBase - Global Arabic Dictionary"
+                } />
+                <meta property="og:description" content={expandedEntry
+                    ? `Learn the meaning of ${expandedEntry.term} in ${expandedEntry.dialect}.`
+                    : "The ultimate tool for serious Arabic learners. Explore dialects, capture words, and master the language."
+                } />
+
+                {/* Twitter */}
+                <meta property="twitter:card" content="summary_large_image" />
+                <meta property="twitter:title" content={expandedEntry
+                    ? `${expandedEntry.term} - ${expandedEntry.translation} (${expandedEntry.dialect})`
+                    : "ArabicBase - Global Arabic Dictionary"
+                } />
+                <meta property="twitter:description" content={expandedEntry
+                    ? `Learn the meaning of ${expandedEntry.term} in ${expandedEntry.dialect}.`
+                    : "The ultimate tool for serious Arabic learners. Explore dialects, capture words, and master the language."
+                } />
+
+                {/* Structured Data */}
+                <script type="application/ld+json">{jsonLd}</script>
+            </Helmet>
+
             {/* Header Section */}
             <div className="mb-8 text-center space-y-3">
                 <div className="inline-flex items-center justify-center p-2.5 rounded-2xl bg-indigo-100/50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 ring-1 ring-indigo-500/20 mb-2">

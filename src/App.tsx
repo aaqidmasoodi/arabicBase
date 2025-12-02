@@ -116,6 +116,7 @@ function App() {
                   <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100">
                     <Routes>
                       <Route path="/" element={<Database />} />
+                      <Route path="/dictionary/:dialect/:term" element={<Database />} />
                       <Route path="/library" element={<EntryList onEdit={handleEdit} />} />
                       <Route path="/explore" element={<Explore onEdit={handleEdit} />} />
                       <Route path="/settings" element={<Settings />} />
@@ -134,6 +135,7 @@ function App() {
               <PublicLayout>
                 <Routes>
                   <Route path="/" element={<Database />} />
+                  <Route path="/dictionary/:dialect/:term" element={<Database />} />
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
               </PublicLayout>
