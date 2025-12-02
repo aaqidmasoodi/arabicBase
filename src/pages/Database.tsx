@@ -223,30 +223,34 @@ export const Database: React.FC = () => {
                 <script type="application/ld+json">{jsonLd}</script>
             </Helmet>
 
-            {/* Header Section */}
-            <div className="mb-8 text-center space-y-3">
-                <div className="inline-flex items-center justify-center p-2.5 rounded-2xl bg-indigo-100/50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 ring-1 ring-indigo-500/20 mb-2">
-                    <Globe size={20} />
-                </div>
-                <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent">
-                    Global Database
-                </h1>
-                <p className="text-base text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-                    Explore the collective knowledge of the community.
-                </p>
-            </div>
+
 
             {/* Search and Filter Bar */}
             <div className="sticky top-20 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl p-3 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-lg mb-6 transition-all duration-300">
                 <div className="flex flex-col gap-3">
-                    <div className="flex flex-col md:flex-row gap-3">
-                        <div className="relative flex-1 group">
+                    <div className="flex flex-col md:flex-row gap-3 items-center">
+                        {/* Compact Header Integration */}
+                        <div className="hidden md:flex items-center gap-3 pr-4 border-r border-gray-200 dark:border-gray-700 mr-1 shrink-0">
+                            <div className="p-2 rounded-xl bg-indigo-100/50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 ring-1 ring-indigo-500/20">
+                                <Globe size={18} />
+                            </div>
+                            <div className="flex flex-col">
+                                <h1 className="text-lg font-bold bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent leading-tight">
+                                    Global Database
+                                </h1>
+                                <span className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">
+                                    Community Knowledge Base
+                                </span>
+                            </div>
+                        </div>
+
+                        <div className="relative flex-1 group w-full">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-500 transition-colors" size={18} />
                             <input
                                 type="text"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                placeholder="Search words, meanings..."
+                                placeholder="Search the global database..."
                                 className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 outline-none transition-all text-sm"
                             />
                         </div>
