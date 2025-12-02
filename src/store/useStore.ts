@@ -19,6 +19,7 @@ interface AppState {
     loadGlobalEntries: () => Promise<void>;
     forkEntry: (entry: Entry) => Promise<void>;
     loadGlobalData: () => Promise<void>;
+    fetchEntry: (id: string) => Promise<Entry | null>;
     isLoading: boolean;
     theme: 'light' | 'dark';
     toggleTheme: () => void;
@@ -102,6 +103,29 @@ export const useStore = create<AppState>((set, get) => ({
             set({ globalEntries });
         } catch (error) {
             console.error('Failed to load global entries:', error);
+        } finally {
+            set({ isLoading: false });
+        }
+    },
+
+    fetchEntry: async (id) => {
+        // Check if already in store
+        const existing = get().globalEntries.find(e => e.id === id);
+        if (existing) return existing;
+
+        set({ isLoading: true });
+        try {
+            const entry = await storage.getEntryById(id);
+            if (entry) {
+                set(state => ({
+                    globalEntries: [...state.globalEntries, entry]
+                }));
+                return entry;
+            }
+            return null;
+        } catch (error) {
+            console.error('Failed to fetch entry:', error);
+            return null;
         } finally {
             set({ isLoading: false });
         }

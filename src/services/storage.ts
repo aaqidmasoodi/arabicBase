@@ -47,6 +47,27 @@ export const storage = {
         })) as Entry[];
     },
 
+    async getEntryById(id: string): Promise<Entry | null> {
+        const { data, error } = await supabase
+            .from('entries')
+            .select('*')
+            .eq('id', id)
+            .single();
+
+        if (error) {
+            console.error('Error fetching entry by id:', error);
+            return null;
+        }
+
+        return {
+            ...data,
+            createdAt: new Date(data.created_at).getTime(),
+            updatedAt: new Date(data.updated_at).getTime(),
+            aiEnrichment: data.ai_enrichment,
+            hasAiInsights: data.has_ai_insights
+        } as Entry;
+    },
+
     async saveEntry(entry: Entry): Promise<void> {
         // 1. Handle Concept Linking
         let conceptId = null;

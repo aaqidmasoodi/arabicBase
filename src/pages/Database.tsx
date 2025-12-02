@@ -32,6 +32,17 @@ export const Database: React.FC = () => {
         loadGlobalData();
     }, [loadGlobalEntries, loadGlobalData]);
 
+    // Fetch specific entry if not in store (for deep links)
+    useEffect(() => {
+        const entryIdParam = searchParams.get('entry');
+        if (entryIdParam) {
+            const exists = globalEntries.some(e => e.id === entryIdParam);
+            if (!exists) {
+                useStore.getState().fetchEntry(entryIdParam);
+            }
+        }
+    }, [searchParams, globalEntries]);
+
     // Derived state from URL params
     const expandedEntryId = useMemo(() => {
         if (!dialect || !term) return null;
