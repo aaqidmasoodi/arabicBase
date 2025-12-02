@@ -27,6 +27,23 @@ export const storage = {
     },
 
     async getGlobalEntries(): Promise<Entry[]> {
+        // Try to use the server-side deduplication function first
+        const { data: rpcData, error: rpcError } = await supabase.rpc('get_unique_global_entries');
+
+        if (!rpcError && rpcData) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            return rpcData.map((entry: any) => ({
+                ...entry,
+                createdAt: new Date(entry.created_at).getTime(),
+                updatedAt: new Date(entry.updated_at).getTime(),
+                aiEnrichment: entry.ai_enrichment,
+                hasAiInsights: entry.has_ai_insights
+            })) as Entry[];
+        }
+
+        // Fallback to client-side deduplication if RPC fails (e.g. migration not applied)
+        console.warn('RPC get_unique_global_entries failed, falling back to client-side deduplication:', rpcError);
+
         const { data, error } = await supabase
             .from('entries')
             .select('*')
@@ -38,7 +55,18 @@ export const storage = {
             return [];
         }
 
-        return data.map((entry) => ({
+        // Deduplicate entries based on term + dialect + translation
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const uniqueEntries = new Map<string, any>();
+
+        data.forEach(entry => {
+            const key = `${entry.term.toLowerCase()}-${entry.dialect}-${entry.translation.toLowerCase()}`;
+            if (!uniqueEntries.has(key)) {
+                uniqueEntries.set(key, entry);
+            }
+        });
+
+        return Array.from(uniqueEntries.values()).map((entry) => ({
             ...entry,
             createdAt: new Date(entry.created_at).getTime(),
             updatedAt: new Date(entry.updated_at).getTime(),
