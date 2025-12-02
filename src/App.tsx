@@ -4,6 +4,7 @@ import { Layout } from './components/Layout';
 import { EntryList } from './components/EntryList';
 import { EntryForm } from './components/EntryForm';
 import { Explore } from './components/Explore';
+import { Database } from './pages/Database';
 import { Settings } from './components/Settings';
 import { Login } from './components/Login';
 import { useStore } from './store/useStore';
@@ -11,10 +12,12 @@ import { supabase } from './services/supabase';
 import { Plus } from 'lucide-react';
 import type { Entry } from './types/entry';
 import { UpgradeModal } from './components/UpgradeModal';
-import { LandingPage } from './components/LandingPage';
+import { PublicLayout } from './components/PublicLayout';
+import { Navigate } from 'react-router-dom';
+
 
 function App() {
-  const { loadEntries, isLoading, user, setUser, theme, loadProfile } = useStore();
+  const { loadEntries, user, setUser, theme, loadProfile } = useStore();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isUpgradeOpen, setIsUpgradeOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState<Entry | undefined>(undefined);
@@ -31,16 +34,6 @@ function App() {
   }, [theme]);
 
   useEffect(() => {
-    // Check active session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      setIsAuthChecking(false);
-      if (session?.user) {
-        loadEntries();
-        loadProfile(session.user.id);
-      }
-    });
-
     // Listen for auth changes
     const {
       data: { subscription },
@@ -50,6 +43,23 @@ function App() {
         loadEntries();
         loadProfile(session.user.id);
       }
+      // Ensure we stop loading once we get an auth event
+      setIsAuthChecking(false);
+    });
+
+    // Check active session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session && window.location.hash.includes('access_token')) {
+        // If we have a hash but no session yet, let onAuthStateChange handle it
+        return;
+      }
+
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        loadEntries();
+        loadProfile(session.user.id);
+      }
+      setIsAuthChecking(false);
     });
 
     return () => subscription.unsubscribe();
@@ -81,12 +91,10 @@ function App() {
         <Route
           path="*"
           element={
-            !user ? (
-              <LandingPage />
-            ) : (
+            user ? (
               <Layout onUpgrade={() => setIsUpgradeOpen(true)}>
                 <div className="space-y-6">
-                  {location.pathname === '/' && (
+                  {location.pathname === '/library' && (
                     <div className="flex justify-between items-center animate-in fade-in slide-in-from-bottom-4 duration-500">
                       <h2 className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">My Knowledge Base</h2>
                       <button
@@ -105,19 +113,14 @@ function App() {
                     </div>
                   )}
 
-                  {isLoading ? (
-                    <div className="flex justify-center py-20">
-                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500"></div>
-                    </div>
-                  ) : (
-                    <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100">
-                      <Routes>
-                        <Route path="/" element={<EntryList onEdit={handleEdit} />} />
-                        <Route path="/explore" element={<Explore onEdit={handleEdit} />} />
-                        <Route path="/settings" element={<Settings />} />
-                      </Routes>
-                    </div>
-                  )}
+                  <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100">
+                    <Routes>
+                      <Route path="/" element={<Database />} />
+                      <Route path="/library" element={<EntryList onEdit={handleEdit} />} />
+                      <Route path="/explore" element={<Explore onEdit={handleEdit} />} />
+                      <Route path="/settings" element={<Settings />} />
+                    </Routes>
+                  </div>
 
                   {isFormOpen && (
                     <EntryForm
@@ -127,6 +130,13 @@ function App() {
                   )}
                 </div>
               </Layout>
+            ) : (
+              <PublicLayout>
+                <Routes>
+                  <Route path="/" element={<Database />} />
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </PublicLayout>
             )
           }
         />

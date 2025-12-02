@@ -13,6 +13,10 @@ interface AppState {
     categories: string[];
     globalDialects: string[];
     globalCategories: string[];
+    globalConcepts: string[];
+    globalEntries: Entry[];
+    loadGlobalEntries: () => Promise<void>;
+    forkEntry: (entry: Entry) => Promise<void>;
     loadGlobalData: () => Promise<void>;
     isLoading: boolean;
     theme: 'light' | 'dark';
@@ -41,6 +45,8 @@ export const useStore = create<AppState>((set, get) => ({
     categories: [],
     globalDialects: [],
     globalCategories: [],
+    globalConcepts: [],
+    globalEntries: [],
     isLoading: false,
     isPro: false,
     checkLimit: () => {
@@ -77,13 +83,43 @@ export const useStore = create<AppState>((set, get) => ({
         }
     },
 
+    loadGlobalEntries: async () => {
+        set({ isLoading: true });
+        try {
+            const globalEntries = await storage.getGlobalEntries();
+            set({ globalEntries });
+        } catch (error) {
+            console.error('Failed to load global entries:', error);
+        } finally {
+            set({ isLoading: false });
+        }
+    },
+
+    forkEntry: async (entry) => {
+        const { user, addEntry } = get();
+        if (!user) return;
+
+        // Create a copy of the entry
+        const newEntry: Entry = {
+            ...entry,
+            id: crypto.randomUUID(), // New ID
+            userId: user.id, // Assign to current user
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+            // Keep other fields (term, translation, tags, notes, AI insights)
+        };
+
+        await addEntry(newEntry);
+    },
+
     loadGlobalData: async () => {
         try {
-            const [globalDialects, globalCategories] = await Promise.all([
+            const [globalDialects, globalCategories, globalConcepts] = await Promise.all([
                 storage.getGlobalDialects(),
-                storage.getGlobalCategories()
+                storage.getGlobalCategories(),
+                storage.getGlobalConcepts()
             ]);
-            set({ globalDialects, globalCategories });
+            set({ globalDialects, globalCategories, globalConcepts });
         } catch (error) {
             console.error('Failed to load global data:', error);
         }

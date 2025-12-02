@@ -22,6 +22,27 @@ export const storage = {
         })) as Entry[];
     },
 
+    async getGlobalEntries(): Promise<Entry[]> {
+        const { data, error } = await supabase
+            .from('entries')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(100);
+
+        if (error) {
+            console.error('Error fetching global entries:', error);
+            return [];
+        }
+
+        return data.map((entry: any) => ({
+            ...entry,
+            createdAt: new Date(entry.created_at).getTime(),
+            updatedAt: new Date(entry.updated_at).getTime(),
+            aiEnrichment: entry.ai_enrichment,
+            hasAiInsights: entry.has_ai_insights
+        })) as Entry[];
+    },
+
     async saveEntry(entry: Entry): Promise<void> {
         // 1. Handle Concept Linking
         let conceptId = null;
@@ -277,6 +298,19 @@ export const storage = {
 
         if (error) {
             console.error('Error fetching global categories:', error);
+            return [];
+        }
+        return data.map(c => c.name);
+    },
+
+    async getGlobalConcepts(): Promise<string[]> {
+        const { data, error } = await supabase
+            .from('concepts')
+            .select('name')
+            .order('name');
+
+        if (error) {
+            console.error('Error fetching global concepts:', error);
             return [];
         }
         return data.map(c => c.name);

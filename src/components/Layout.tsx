@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutGrid, Globe, Settings, Moon, Sun, Sparkles, Crown } from 'lucide-react';
+import { LayoutGrid, Globe, Settings, Moon, Sun, Sparkles, Crown, Database } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import clsx from 'clsx';
 
@@ -10,7 +10,7 @@ interface LayoutProps {
 }
 
 export const Layout: React.FC<LayoutProps> = ({ children, onUpgrade }) => {
-    const { theme, toggleTheme, isPro, entries } = useStore();
+    const { theme, toggleTheme, isPro, entries, user } = useStore();
     const entryCount = entries.length;
     const limit = 100;
     const percentage = Math.min((entryCount / limit) * 100, 100);
@@ -60,18 +60,20 @@ export const Layout: React.FC<LayoutProps> = ({ children, onUpgrade }) => {
                     </div>
 
                     <nav className="flex-1 py-6 px-3 space-y-2">
-                        <NavLink
-                            to="/"
-                            className={({ isActive }) => clsx(
-                                "flex items-center px-3 lg:px-4 py-3 rounded-xl transition-all duration-200 group",
-                                isActive
-                                    ? "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 shadow-sm"
-                                    : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-gray-200"
-                            )}
-                        >
-                            <LayoutGrid size={22} />
-                            <span className="hidden lg:block ml-3 font-medium">My Entries</span>
-                        </NavLink>
+                        {user && (
+                            <NavLink
+                                to="/library"
+                                className={({ isActive }) => clsx(
+                                    "flex items-center px-3 lg:px-4 py-3 rounded-xl transition-all duration-200 group",
+                                    isActive
+                                        ? "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 shadow-sm"
+                                        : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-gray-200"
+                                )}
+                            >
+                                <LayoutGrid size={22} />
+                                <span className="hidden lg:block ml-3 font-medium">My Entries</span>
+                            </NavLink>
+                        )}
 
                         <NavLink
                             to="/explore"
@@ -83,7 +85,20 @@ export const Layout: React.FC<LayoutProps> = ({ children, onUpgrade }) => {
                             )}
                         >
                             <Globe size={22} />
-                            <span className="hidden lg:block ml-3 font-medium">Explore</span>
+                            <span className="hidden lg:block ml-3 font-medium">Explore Entries</span>
+                        </NavLink>
+
+                        <NavLink
+                            to="/"
+                            className={({ isActive }) => clsx(
+                                "flex items-center px-3 lg:px-4 py-3 rounded-xl transition-all duration-200 group",
+                                isActive
+                                    ? "bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 shadow-sm"
+                                    : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-gray-200"
+                            )}
+                        >
+                            <Database size={22} />
+                            <span className="hidden lg:block ml-3 font-medium">Global Database</span>
                         </NavLink>
 
                         <NavLink
@@ -167,18 +182,20 @@ export const Layout: React.FC<LayoutProps> = ({ children, onUpgrade }) => {
                 {/* Mobile Bottom Navigation */}
                 <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 pb-safe z-30">
                     <div className="flex justify-around items-center h-16">
-                        <NavLink
-                            to="/"
-                            className={({ isActive }) => clsx(
-                                "flex flex-col items-center justify-center w-full h-full transition-colors",
-                                isActive
-                                    ? "text-emerald-600 dark:text-emerald-400"
-                                    : "text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
-                            )}
-                        >
-                            <LayoutGrid size={24} />
-                            <span className="text-[10px] font-medium mt-1">Entries</span>
-                        </NavLink>
+                        {user && (
+                            <NavLink
+                                to="/library"
+                                className={({ isActive }) => clsx(
+                                    "flex flex-col items-center justify-center w-full h-full transition-colors",
+                                    isActive
+                                        ? "text-emerald-600 dark:text-emerald-400"
+                                        : "text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
+                                )}
+                            >
+                                <LayoutGrid size={24} />
+                                <span className="text-[10px] font-medium mt-1">Entries</span>
+                            </NavLink>
+                        )}
 
                         <NavLink
                             to="/explore"
@@ -190,7 +207,20 @@ export const Layout: React.FC<LayoutProps> = ({ children, onUpgrade }) => {
                             )}
                         >
                             <Globe size={24} />
-                            <span className="text-[10px] font-medium mt-1">Explore</span>
+                            <span className="text-[10px] font-medium mt-1">Explore Entries</span>
+                        </NavLink>
+
+                        <NavLink
+                            to="/"
+                            className={({ isActive }) => clsx(
+                                "flex flex-col items-center justify-center w-full h-full transition-colors",
+                                isActive
+                                    ? "text-indigo-600 dark:text-indigo-400"
+                                    : "text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
+                            )}
+                        >
+                            <Database size={24} />
+                            <span className="text-[10px] font-medium mt-1">Global Database</span>
                         </NavLink>
 
                         <NavLink
